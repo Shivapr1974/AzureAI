@@ -182,6 +182,8 @@ python src/rag_pipeline.py
 ### Azure App Service
 - Deploy Python App
 - Add environment variables  
+- Configuration - Stack settings - Startup command as below
+  bash -c "python3 -m pip install --no-cache-dir -r requirements.txt && python3 -m uvicorn app:app --host 0.0.0.0 --port 8000"
 - Done
 
 ### Azure Container Apps
