@@ -12,14 +12,15 @@ def home():
     <html>
     <head>
         <title>Azure RAG Chat</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <style>
             body {
                 font-family: Arial, sans-serif;
                 margin: 0;
                 background: #f5f5f5;
                 display: flex;
-                flex-direction: column;
-                height: 100vh;
+                flex-direction: column;                
+                min-height: 100vh;        /* safer than strict 100vh */
             }
             #chat-container {
                 flex: 1;
@@ -74,15 +75,21 @@ def home():
                 cursor: pointer;
             }
 
-            /* Spinner */
             #spinner {
+                position: fixed;
+                bottom: 18%;              /* higher than before – adjust 16–22% as you like */
+                left: 50%;
+                transform: translateX(-50%);
+                z-index: 1000;
                 display: none;
-                font-size: 32px;
+                font-size: 30px;
                 text-align: center;
-                margin-top: 10px;
-                animation: pulse 1.2s infinite;
+                background: #ffffff;       /* white background */
+                padding: 8px 16px;
+                border-radius: 16px;       /* pill look */
+                box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+                # animation: pulse 1.2s infinite;
             }
-
             @keyframes pulse {
                 0% { opacity: 0.3; }
                 50% { opacity: 1; }
@@ -124,7 +131,37 @@ def home():
             .message {
                 line-height: 1.25;
             }
+            /* Mobile adjustments */
+            @media (max-width: 600px) {
+                #input-area {
+                    position: fixed;
+                    bottom: 2%;        /* <-- raise it 10% above bottom */
+                    left: 0;
+                    right: 0;
+                    z-index: 999;
+                    background: white;
+                    padding: 10px;
+                    border-top: 1px solid #ddd;
+                    display: flex;
+                    gap: 8px;
+                    border-radius: 12px 12px 0 0; /* nice rounded top */
+                }
 
+                body {
+                    padding-bottom: 20%; /* prevent chat messages from hiding behind it */
+                }
+
+                #input-area input {
+                    font-size: 18px;
+                    padding: 12px;
+                }
+
+                #input-area button {
+                    font-size: 18px;
+                    padding: 12px 20px;
+                    border-radius: 8px;
+                }
+            }
 
         </style>
         <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -194,7 +231,7 @@ def home():
                 }
             });
 
-            appendMessage("Hi! I'm your Azure Cloud Assistant. Ask me anything.", "bot");
+            appendMessage("Hi! I'm your Azure Cloud Assistant developed by Sivakumar Ramakrishnan. Ask me anything.", "bot");
         </script>
     </body>
     </html>
