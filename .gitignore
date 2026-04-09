@@ -1,2 +1,4 @@
 *.env
 AIChatBot/.venv/
+/AIChatBot/__pycache__
+/AIChatBot/src/__pycache__
