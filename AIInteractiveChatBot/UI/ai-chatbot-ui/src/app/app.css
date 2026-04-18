@@ -1,5 +1,5 @@
 .chat-container {
-  width: 700px;
+  width: 800px;
   max-width: 95%;
   margin: 30px auto;
   font-family: Arial, sans-serif;
@@ -46,6 +46,7 @@
 .input-row {
   display: flex;
   gap: 10px;
+  margin-bottom: 20px;
 }
 
 input[type="text"] {
@@ -57,4 +58,19 @@ input[type="text"] {
 button {
   padding: 10px 16px;
   cursor: pointer;
+}
+
+.result-panel {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 12px;
+  background: #fafafa;
+  margin-top: 12px;
+}
+
+pre {
+  background: #f3f3f3;
+  padding: 10px;
+  border-radius: 6px;
+  overflow-x: auto;
 }

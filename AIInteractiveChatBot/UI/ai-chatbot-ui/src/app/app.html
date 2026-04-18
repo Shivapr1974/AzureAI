@@ -28,4 +28,10 @@
       {{ loading ? 'Sending...' : 'Send' }}
     </button>
   </div>
+
+  <div class="result-panel" *ngIf="generatedUser">
+    <h3>Generated user.json</h3>
+    <pre>{{ generatedUser | json }}</pre>
+    <p *ngIf="submitStatus"><strong>Status:</strong> {{ submitStatus }}</p>
+  </div>
 </div>

@@ -2,8 +2,15 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
+export interface UserJson {
+  firstName: string;
+  lastName: string;
+  email: string;
+}
+
 export interface ChatResponse {
   answer: string;
+  user?: UserJson;
 }
 
 export interface UploadResponse {
@@ -12,12 +19,18 @@ export interface UploadResponse {
   source: string;
 }
 
+export interface SubmitResponse {
+  message: string;
+  submittedUser: UserJson;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class ChatService {
   private chatUrl = 'http://127.0.0.1:8000/chat';
   private uploadUrl = 'http://127.0.0.1:8000/upload';
+  private submitUrl = 'http://127.0.0.1:8000/submit';
 
   constructor(private http: HttpClient) {}
 
@@ -29,5 +42,9 @@ export class ChatService {
     const formData = new FormData();
     formData.append('file', file);
     return this.http.post<UploadResponse>(this.uploadUrl, formData);
+  }
+
+  submitUser(user: UserJson): Observable<SubmitResponse> {
+    return this.http.post<SubmitResponse>(this.submitUrl, user);
   }
 }
