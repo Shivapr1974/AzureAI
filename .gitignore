@@ -2,3 +2,11 @@
 AIChatBot/.venv/
 /AIChatBot/__pycache__
 /AIChatBot/src/__pycache__
+/AIInteractiveChatBot/ChatBot/venv
+/AIInteractiveChatBot/ChatBot/__pycache__
+/AIInteractiveChatBot/ChatBot/chroma_db/chroma.sqlite3
+/AIInteractiveChatBot/ChatBot/UI/ai-chatbot-ui/.vscode
+/AIInteractiveChatBot/ChatBot/src/__pycache__
+/AIInteractiveChatBot/UI/ai-chatbot-ui/.vscode
+
+

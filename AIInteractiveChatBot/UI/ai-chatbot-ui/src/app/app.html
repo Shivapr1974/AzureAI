@@ -1,0 +1,26 @@
+<div class="chat-container">
+  <h2>AI Chatbot</h2>
+
+  <div class="chat-window">
+    <div
+      *ngFor="let message of messages"
+      class="message"
+      [ngClass]="message.sender"
+    >
+      <strong>{{ message.sender === 'user' ? 'You' : 'Bot' }}:</strong>
+      <span>{{ message.text }}</span>
+    </div>
+  </div>
+
+  <div class="input-row">
+    <input
+      type="text"
+      [(ngModel)]="question"
+      placeholder="Type your question..."
+      (keyup.enter)="sendMessage()"
+    />
+    <button (click)="sendMessage()" [disabled]="loading">
+      {{ loading ? 'Sending...' : 'Send' }}
+    </button>
+  </div>
+</div>
