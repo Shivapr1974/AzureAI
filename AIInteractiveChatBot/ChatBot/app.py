@@ -1,9 +1,9 @@
 # app.py
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 
-from src.rag_pipeline import ask_llm_with_search
+from src.rag_pipeline import ask_llm_with_search, save_uploaded_file_to_chroma
 
 app = FastAPI()
 
@@ -24,3 +24,12 @@ async def chat(request: Request):
 
     answer = ask_llm_with_search(question)
     return {"answer": answer}
+
+@app.post("/upload")
+async def upload_file(file: UploadFile = File(...)):
+    result = await save_uploaded_file_to_chroma(file)
+    return {
+        "message": "Saved to ChromaDB successfully",
+        "count": result.get("count", 0),
+        "source": file.filename
+    }

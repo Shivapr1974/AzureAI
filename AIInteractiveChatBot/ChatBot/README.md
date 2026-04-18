@@ -122,6 +122,7 @@ uvicorn==0.38.0
 python-dotenv==1.2.1  
 pypdf==6.2.0  
 requests==2.32.5  
+python-multipart==0.0.20
 
 ---
 

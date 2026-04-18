@@ -1,6 +1,11 @@
 <div class="chat-container">
   <h2>AI Chatbot</h2>
 
+  <div class="upload-row">
+    <input type="file" (change)="onFileSelected($event)" accept=".txt,.pdf" />
+    <span class="upload-status">{{ uploadStatus }}</span>
+  </div>
+
   <div class="chat-window">
     <div
       *ngFor="let message of messages"

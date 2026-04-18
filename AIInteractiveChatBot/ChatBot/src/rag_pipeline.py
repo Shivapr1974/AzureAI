@@ -1,9 +1,13 @@
 import os
 import uuid
+from io import BytesIO
+
 from dotenv import load_dotenv
 from openai import OpenAI
 import chromadb
 from chromadb.utils.embedding_functions import OpenAIEmbeddingFunction
+from fastapi import UploadFile
+from pypdf import PdfReader
 
 # Load .env variables
 load_dotenv()
@@ -28,6 +32,7 @@ collection = chroma_client.get_or_create_collection(
     name=COLLECTION_NAME,
     embedding_function=embedding_function
 )
+
 
 def safe_text(text):
     return text if text else ""
@@ -55,7 +60,7 @@ def save_index(text: str, source: str = "manual_input"):
     chunks = chunk_text(text)
 
     if not chunks:
-        return {"message": "No content to save", "count": 0}
+        return {"message": "No content to save", "count": 0, "source": source}
 
     ids = [str(uuid.uuid4()) for _ in chunks]
     metadatas = [{"source": source, "chunk": i + 1} for i in range(len(chunks))]
@@ -71,6 +76,40 @@ def save_index(text: str, source: str = "manual_input"):
         "count": len(chunks),
         "source": source
     }
+
+
+def extract_text_from_txt(content: bytes) -> str:
+    return content.decode("utf-8", errors="ignore")
+
+
+def extract_text_from_pdf(content: bytes) -> str:
+    pdf_reader = PdfReader(BytesIO(content))
+    pages = []
+
+    for page in pdf_reader.pages:
+        pages.append(page.extract_text() or "")
+
+    return "\n".join(pages)
+
+
+async def save_uploaded_file_to_chroma(file: UploadFile):
+    content = await file.read()
+    filename = file.filename or "uploaded_file"
+
+    lower_name = filename.lower()
+
+    if lower_name.endswith(".txt"):
+        text = extract_text_from_txt(content)
+    elif lower_name.endswith(".pdf"):
+        text = extract_text_from_pdf(content)
+    else:
+        return {
+            "message": "Unsupported file type. Please upload .txt or .pdf",
+            "count": 0,
+            "source": filename
+        }
+
+    return save_index(text=text, source=filename)
 
 
 def search_index(query: str, top_k: int = 5):
@@ -90,7 +129,6 @@ def build_context_from_results(results: dict) -> str:
         meta = metas[i] if i < len(metas) else {}
         source = meta.get("source", "unknown")
         chunk_no = meta.get("chunk", "?")
-
         chunks.append(f"Source: {source} | Chunk: {chunk_no}\n{doc}")
 
     return "\n\n---\n\n".join(chunks)
@@ -103,7 +141,7 @@ def ask_llm_with_search(question: str) -> str:
     user_prompt = f"""
 You are a helpful assistant that guides users to provide information needed for a form.
 
-- Understand the user’s input and capture relevant details (name, email, etc.).
+- Understand the user’s input and capture relevant details.
 - Use the provided context if it is relevant.
 - If information is missing, ask simple follow-up questions.
 - Do not assume or make up values.
@@ -123,15 +161,3 @@ Question: {question}
     )
 
     return safe_text(resp.choices[0].message.content).strip()
-
-
-if __name__ == "__main__":
-    sample_text = """
-    A cloud adoption strategy helps organizations move workloads to the cloud.
-    Landing zones provide a pre-configured foundation for governance and security.
-    """
-
-    print(save_index(sample_text))
-
-    question = "My name is Shiva"
-    print(ask_llm_with_search(question))

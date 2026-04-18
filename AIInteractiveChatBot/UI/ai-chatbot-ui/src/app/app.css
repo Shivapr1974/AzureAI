@@ -5,6 +5,18 @@
   font-family: Arial, sans-serif;
 }
 
+.upload-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.upload-status {
+  font-size: 13px;
+  color: #555;
+}
+
 .chat-window {
   border: 1px solid #ccc;
   border-radius: 8px;
@@ -36,7 +48,7 @@
   gap: 10px;
 }
 
-input {
+input[type="text"] {
   flex: 1;
   padding: 10px;
   font-size: 14px;
