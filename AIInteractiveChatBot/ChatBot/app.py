@@ -55,7 +55,7 @@ def handle_normal_chat(message: str) -> str:
         return "Sure. Enter first name:"
 
     # Normal chatbot mode goes through your RAG pipeline
-    answer = (message, session);
+    answer = ask_llm(message, session);
     # store history
     session["history"].append({
         "question": message,
