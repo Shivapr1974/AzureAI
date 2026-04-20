@@ -2,7 +2,8 @@ from fastapi import FastAPI, Request, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 import re
 
-from src.rag_pipeline import ask_llm_with_search, save_uploaded_file_to_chroma
+# from src.rag_pipeline import ask_llm, save_uploaded_file
+from src.wiki_pipeline import ask_llm, save_uploaded_file
 
 app = FastAPI()
 
@@ -54,7 +55,7 @@ def handle_normal_chat(message: str) -> str:
         return "Sure. Enter first name:"
 
     # Normal chatbot mode goes through your RAG pipeline
-    answer = ask_llm_with_search(message, session);
+    answer = (message, session);
     # store history
     session["history"].append({
         "question": message,
@@ -131,5 +132,5 @@ async def submit(request: Request):
 
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
-    result = await save_uploaded_file_to_chroma(file)
+    result = await save_uploaded_file(file)
     return result
