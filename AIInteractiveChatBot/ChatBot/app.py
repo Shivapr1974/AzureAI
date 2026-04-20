@@ -25,7 +25,8 @@ session = {
         "firstName": "",
         "lastName": "",
         "email": ""
-    }
+    },
+    "history": []
 }
 
 
@@ -53,7 +54,13 @@ def handle_normal_chat(message: str) -> str:
         return "Sure. Enter first name:"
 
     # Normal chatbot mode goes through your RAG pipeline
-    return ask_llm_with_search(message)
+    answer = ask_llm_with_search(message, session);
+    # store history
+    session["history"].append({
+        "question": message,
+        "answer": answer
+    })
+    return answer;
 
 
 @app.post("/chat")

@@ -8,6 +8,7 @@ import chromadb
 from chromadb.utils.embedding_functions import OpenAIEmbeddingFunction
 from fastapi import UploadFile
 from pypdf import PdfReader
+# from requests import session
 
 # Load .env variables
 load_dotenv()
@@ -134,24 +135,54 @@ def build_context_from_results(results: dict) -> str:
     return "\n\n---\n\n".join(chunks)
 
 
-def ask_llm_with_search(question: str) -> str:
+def ask_llm_with_search(question: str, session: dict) -> str:
+    user = session.get("user", {})
     results = search_index(question)
     context = build_context_from_results(results)
 
+    history = session.get("history", [])
+    last_10 = history[-10:]   
+    conversation_context = ""
+    history_info = f"Total conversation turns: {len(history)}"
+
+    # User info block
+    user_context = ""
+    if any(user.values()):
+        user_context = f"""
+        Known User Information:
+        - First Name: {user.get('firstName') or 'Not provided'}
+        - Last Name: {user.get('lastName') or 'Not provided'}
+        - Email: {user.get('email') or 'Not provided'}
+        """
+
+    for item in last_10:
+        conversation_context += f"User: {item['question']}\n"
+        conversation_context += f"Assistant: {item['answer']}\n"
+
+    if len(conversation_context) > 4000:
+        conversation_context = conversation_context[-4000:]
+
     user_prompt = f"""
-You are a helpful assistant that guides users to provide information needed for a form.
+    You are a helpful assistant that guides users to provide information needed for a form.
 
-- Understand the user’s input and capture relevant details.
-- Use the provided context if it is relevant.
-- If information is missing, ask simple follow-up questions.
-- Do not assume or make up values.
-- Keep responses short, clear, and conversational.
+    - Understand the user’s input and capture relevant details.
+    - Use the provided context if it is relevant.
+    - If information is missing, ask simple follow-up questions.
+    - Do not assume or make up values.
+    - Keep responses short, clear, and conversational.
+    
+    {history_info}
 
-Context:
-{context if context else "No indexed content available"}
+    Previous Conversation:
+    {conversation_context if conversation_context else "None"}
 
-Question: {question}
-"""
+    {user_context}
+
+    Context:
+    {context if context else "No indexed content available"}
+    
+    Current Question: {question}
+    """
 
     resp = client.chat.completions.create(
         model="gpt-4o-mini",
