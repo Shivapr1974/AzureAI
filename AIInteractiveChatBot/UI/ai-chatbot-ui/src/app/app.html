@@ -6,7 +6,7 @@
     <span class="upload-status">{{ uploadStatus }}</span>
   </div>
 
-    <div class="workflow-bar">
+    <!-- <div class="workflow-bar">
     <button type="button" (click)="startWorkflow('create user')" [disabled]="loading">
       Create User
     </button>
@@ -18,9 +18,22 @@
     <button type="button" (click)="startWorkflow('create bc form')" [disabled]="loading">
       Create BC Form
     </button>
-  </div>
+  </div> -->
 
-  <div class="chat-window" #chatWindow>
+    <div class="chat-window" #chatWindow>
+        <div class="chat-bands">
+      <div class="chat-band" (click)="startWorkflow('create user')">
+        Create User
+      </div>
+
+      <div class="chat-band" (click)="startWorkflow('create student')">
+        Create Student
+      </div>
+
+      <div class="chat-band" (click)="startWorkflow('create bc form')">
+        Create BC Form
+      </div>
+    </div>
     <div
       *ngFor="let message of messages"
       class="message"

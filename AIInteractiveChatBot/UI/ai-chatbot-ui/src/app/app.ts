@@ -68,7 +68,7 @@ export class App {
     this.messages.push({ sender: 'user', text: trimmedQuestion });
     this.loading = true;
     this.question = '';
-
+    this.scrollToBottom()
     this.chatService.sendMessage(trimmedQuestion).subscribe({
       next: (response: ChatResponse) => {
         this.messages.push({
