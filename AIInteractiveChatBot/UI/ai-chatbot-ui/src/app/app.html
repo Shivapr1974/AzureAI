@@ -30,8 +30,16 @@
   </div>
 
   <div class="result-panel" *ngIf="generatedUser">
-    <h3>Generated user.json</h3>
+    <h3>Created User</h3>
     <pre>{{ generatedUser | json }}</pre>
-    <p *ngIf="submitStatus"><strong>Status:</strong> {{ submitStatus }}</p>
+  </div>
+
+  <div class="result-panel" *ngIf="generatedStudent">
+    <h3>Created Student</h3>
+    <pre>{{ generatedStudent | json }}</pre>
+  </div>
+
+  <div class="result-panel" *ngIf="agentStatus">
+    <p><strong>Status:</strong> {{ agentStatus }}</p>
   </div>
 </div>

@@ -5,8 +5,8 @@ import {
   ChatService,
   ChatResponse,
   UploadResponse,
-  SubmitResponse,
-  UserJson
+  UserJson,
+  StudentJson
 } from './services/chat';
 
 interface ChatMessage {
@@ -25,13 +25,14 @@ export class App {
   question = '';
   loading = false;
   uploadStatus = '';
-  submitStatus = '';
+  agentStatus = '';
   generatedUser: UserJson | null = null;
+  generatedStudent: StudentJson | null = null;
 
   messages: ChatMessage[] = [
     {
       sender: 'bot',
-      text: "Hello. Ask me anything, upload a document, or type 'create user' to begin."
+      text: "Hello. Ask me anything, upload a document, or type 'create user' or 'create student' to begin."
     }
   ];
 
@@ -49,6 +50,7 @@ export class App {
 
     this.messages.push({ sender: 'user', text: trimmedQuestion });
     this.loading = true;
+    this.question = '';
 
     this.chatService.sendMessage(trimmedQuestion).subscribe({
       next: (response: ChatResponse) => {
@@ -57,38 +59,15 @@ export class App {
           text: response.answer || 'No response received.'
         });
 
-        // If backend returns user JSON, validate and fake-submit
+        this.generatedUser = response.user ?? null;
+        this.generatedStudent = response.student ?? null;
+
         if (response.user) {
-          this.generatedUser = response.user;
-
-          if (this.isValidUser(response.user)) {
-            this.submitStatus = 'User JSON valid. Submitting...';
-
-            this.chatService.submitUser(response.user).subscribe({
-              next: (submitResponse: SubmitResponse) => {
-                this.submitStatus = submitResponse.message;
-                this.messages.push({
-                  sender: 'bot',
-                  text: submitResponse.message
-                });
-                this.cdr.detectChanges();
-              },
-              error: () => {
-                this.submitStatus = 'Fake submit failed.';
-                this.messages.push({
-                  sender: 'bot',
-                  text: 'Fake submit failed.'
-                });
-                this.cdr.detectChanges();
-              }
-            });
-          } else {
-            this.submitStatus = 'Generated user JSON failed validation.';
-            this.messages.push({
-              sender: 'bot',
-              text: 'Generated user JSON failed validation.'
-            });
-          }
+          this.agentStatus = 'User flow completed.';
+        } else if (response.student) {
+          this.agentStatus = 'Student flow completed.';
+        } else {
+          this.agentStatus = response.mode ? `Mode: ${response.mode}` : '';
         }
 
         this.loading = false;
@@ -103,8 +82,6 @@ export class App {
         this.cdr.detectChanges();
       }
     });
-
-    this.question = '';
   }
 
   onFileSelected(event: Event): void {
@@ -119,7 +96,8 @@ export class App {
 
     this.chatService.uploadFile(file).subscribe({
       next: (response: UploadResponse) => {
-        this.uploadStatus = `${response?.source || file.name} uploaded successfully. Indexed ${response?.count ?? 0} chunks.`;
+        this.uploadStatus =
+          `${response?.source || file.name} uploaded successfully.`;
 
         this.messages.push({
           sender: 'bot',
@@ -139,22 +117,5 @@ export class App {
     });
 
     input.value = '';
-  }
-
-  isValidUser(user: UserJson): boolean {
-    if (!user.firstName?.trim()) {
-      return false;
-    }
-
-    if (!user.lastName?.trim()) {
-      return false;
-    }
-
-    if (!user.email?.trim()) {
-      return false;
-    }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(user.email);
   }
 }
