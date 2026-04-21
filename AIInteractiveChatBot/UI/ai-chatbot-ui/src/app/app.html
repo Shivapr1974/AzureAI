@@ -38,6 +38,10 @@
     <h3>Created Student</h3>
     <pre>{{ generatedStudent | json }}</pre>
   </div>
+  <div class="result-panel" *ngIf="generatedBcForm">
+    <h3>Generated BC Form</h3>
+    <pre>{{ generatedBcForm | json }}</pre>
+  </div>
 
   <div class="result-panel" *ngIf="agentStatus">
     <p><strong>Status:</strong> {{ agentStatus }}</p>

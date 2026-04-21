@@ -6,7 +6,8 @@ import {
   ChatResponse,
   UploadResponse,
   UserJson,
-  StudentJson
+  StudentJson,
+  BcFormJson
 } from './services/chat';
 
 interface ChatMessage {
@@ -29,6 +30,7 @@ export class App {
   agentStatus = '';
   generatedUser: UserJson | null = null;
   generatedStudent: StudentJson | null = null;
+  generatedBcForm: BcFormJson | null = null;
 
   messages: ChatMessage[] = [
     {
@@ -69,6 +71,7 @@ export class App {
         setTimeout(() => this.scrollToBottom(), 0);
         this.generatedUser = response.user ?? null;
         this.generatedStudent = response.student ?? null;
+        this.generatedBcForm = response.bcForm?? null;
 
         if (response.user) {
           this.agentStatus = 'User flow completed.';

@@ -1,4 +1,6 @@
-from src.rag_pipeline import classify_workflow_input
+import json
+
+from src.rag_pipeline import ask_llm
 
 VALID_INT_TYPES = {"IT", "Data", "IT & Data"}
 
@@ -54,6 +56,56 @@ def normalize_int_type(value: str) -> str:
     return value.strip()
 
 
+def classify_or_answer_bc_form(
+    message: str,
+    expected_field: str,
+    session: dict
+) -> dict:
+    rules = ""
+    if expected_field == "intType":
+        rules = "For intType, valid values are exactly: IT, Data, IT & Data."
+
+    prompt = f"""
+You are helping with an interactive BC Form workflow.
+
+Expected field: {expected_field}
+
+{rules}
+
+Return ONLY valid JSON in one of these forms:
+
+For field input:
+{{"intent":"field_input","field":"{expected_field}","value":"..."}}
+
+For a user question:
+{{"intent":"chat","answer":"..."}}
+
+For cancel:
+{{"intent":"cancel"}}
+
+Rules:
+- If the user is clearly providing the expected field, return field_input.
+- If the user is asking a question, return chat and answer it briefly.
+- If the user wants to stop, return cancel.
+- Otherwise, prefer field_input for free-form fields.
+- Do not output anything outside JSON.
+
+User message:
+{message}
+"""
+
+    raw = ask_llm(prompt, session)
+
+    try:
+        return json.loads(raw)
+    except Exception:
+        return {
+            "intent": "field_input",
+            "field": expected_field,
+            "value": message.strip()
+        }
+
+
 class CreateBCFormAgent:
     async def run(self, message: str, session: dict, ask_llm_func) -> str | dict:
         bc_form = session["bcForm"]
@@ -75,87 +127,55 @@ class CreateBCFormAgent:
                 "mode": "CHAT"
             }
 
-        text = message.strip()
-        lowered = text.lower()
-
-        if lowered == "cancel":
+        if message.lower().strip() == "cancel":
             reset_bc_form(session)
             return "BC Form creation cancelled. Back to normal chat mode."
 
-        # intType is the only field that needs real validation/classification
-        if expected_field == "intType":
-            result = classify_workflow_input(
-                message,
-                expected_field,
-                ask_llm_func,
-                session
-            )
+        result = classify_or_answer_bc_form(message, expected_field, session)
+        intent = result.get("intent")
 
-            intent = result.get("intent")
+        if intent == "cancel":
+            reset_bc_form(session)
+            return "BC Form creation cancelled. Back to normal chat mode."
 
-            if intent == "cancel":
-                reset_bc_form(session)
-                return "BC Form creation cancelled. Back to normal chat mode."
+        if intent == "chat":
+            return result.get("answer", "Please continue.")
 
-            if intent == "chat":
-                clarification_prompt = f"""
-The user is currently filling a BC Form.
-The current field is intType.
+        if intent == "field_input":
+            value = (result.get("value") or "").strip()
 
-Rules:
-- reqSubName is auto-populated as Shiva Ram
-- intType must be one of: IT, Data, IT & Data
-
-Answer the user's question briefly.
-Do not say the field was filled.
-Do not repeat all instructions.
-
-User message:
-{message}
-"""
-                return ask_llm_func(clarification_prompt, session)
-
-            if intent == "field_input":
-                value = normalize_int_type((result.get("value") or "").strip())
+            if expected_field == "intType":
+                value = normalize_int_type(value)
 
                 if value not in VALID_INT_TYPES:
                     return "Invalid Int Type. Please enter one of: IT, Data, IT & Data."
 
                 bc_form["intType"] = value
-                next_field = get_next_bc_field(bc_form)
 
-                if next_field:
-                    return get_field_prompt(next_field)
+            elif expected_field == "reqType":
+                if not value:
+                    return "Req Type is required."
+                bc_form["reqType"] = value
 
-            return get_field_prompt("intType")
+            elif expected_field == "intName":
+                if not value:
+                    return "Int Name is required."
+                bc_form["intName"] = value
 
-        # All remaining fields are free form.
-        # Accept any non-empty value directly without LLM classification.
-        if expected_field == "reqType":
-            if not text:
-                return "Req Type is required."
-            bc_form["reqType"] = text
+            elif expected_field == "inOverview":
+                if not value:
+                    return "In Overview is required."
+                bc_form["inOverview"] = value
+
+            elif expected_field == "inHighlights":
+                if not value:
+                    return "In Highlights is required."
+                bc_form["inHighlights"] = value
+
             next_field = get_next_bc_field(bc_form)
-            return get_field_prompt(next_field)
 
-        if expected_field == "intName":
-            if not text:
-                return "Int Name is required."
-            bc_form["intName"] = text
-            next_field = get_next_bc_field(bc_form)
-            return get_field_prompt(next_field)
-
-        if expected_field == "inOverview":
-            if not text:
-                return "In Overview is required."
-            bc_form["inOverview"] = text
-            next_field = get_next_bc_field(bc_form)
-            return get_field_prompt(next_field)
-
-        if expected_field == "inHighlights":
-            if not text:
-                return "In Highlights is required."
-            bc_form["inHighlights"] = text
+            if next_field:
+                return get_field_prompt(next_field)
 
             payload = {
                 "reqSubName": bc_form["reqSubName"],

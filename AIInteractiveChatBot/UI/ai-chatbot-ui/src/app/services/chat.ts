@@ -16,11 +16,21 @@ export interface StudentJson {
   grade: string;
 }
 
+export interface BcFormJson {
+  reqSubName: string;
+  intType: string;
+  reqType: string;
+  intName: string;
+  inOverview: string;
+  inHighlights: string;
+}
+
 export interface ChatResponse {
   answer: string;
   user?: UserJson;
   student?: StudentJson;
   mode?: string;
+  bcForm?: BcFormJson;
 }
 
 export interface UploadResponse {
