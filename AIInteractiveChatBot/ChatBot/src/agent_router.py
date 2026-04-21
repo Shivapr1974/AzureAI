@@ -291,8 +291,7 @@ class RouterAgent:
                 "inHighlights": ""
             }
             return (
-                "BC Form started.\n"
-                "Req Sub Name is auto-populated as Shiva Ram.\n"
+                "Req Sub Name is auto-populated as Shiva Ram.<br>"
                 "Enter Int Type (IT, Data, IT & Data)."
             )
 

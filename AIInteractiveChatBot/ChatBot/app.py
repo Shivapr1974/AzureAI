@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 
-from src.wiki_pipeline import ask_llm, save_uploaded_file
+from src.rag_pipeline import ask_llm, save_uploaded_file
 from src.agent_router import handle_agent_message
 
 app = FastAPI()

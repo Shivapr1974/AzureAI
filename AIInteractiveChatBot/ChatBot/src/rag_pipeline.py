@@ -166,11 +166,16 @@ def ask_llm(question: str, session: dict) -> str:
     user_prompt = f"""
     You are a helpful assistant that guides users to provide information needed for a form.
 
+    Rules:
     - Understand the user’s input and capture relevant details.
     - Use the provided context if it is relevant.
     - If information is missing, ask simple follow-up questions.
     - Do not assume or make up values.
     - Keep responses short, clear, and conversational.
+    - Return the final answer in simple HTML only.
+    - Use only these tags when needed: <p>, <ul>, <li>, <b>, <br>
+    - Do not return Markdown.
+    - Do not return <html>, <body>, <script>, or <style> tags.
     
     {history_info}
 

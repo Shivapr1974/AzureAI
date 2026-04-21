@@ -6,6 +6,20 @@
     <span class="upload-status">{{ uploadStatus }}</span>
   </div>
 
+    <div class="workflow-bar">
+    <button type="button" (click)="startWorkflow('create user')" [disabled]="loading">
+      Create User
+    </button>
+
+    <button type="button" (click)="startWorkflow('create student')" [disabled]="loading">
+      Create Student
+    </button>
+
+    <button type="button" (click)="startWorkflow('create bc form')" [disabled]="loading">
+      Create BC Form
+    </button>
+  </div>
+
   <div class="chat-window" #chatWindow>
     <div
       *ngFor="let message of messages"
@@ -13,7 +27,7 @@
       [ngClass]="message.sender"
     >
       <strong>{{ message.sender === 'user' ? 'You' : 'Bot' }}:</strong>
-      <span>{{ message.text }}</span>
+     <div class="message-text" [innerHTML]="message.text"></div>
     </div>
   </div>
 

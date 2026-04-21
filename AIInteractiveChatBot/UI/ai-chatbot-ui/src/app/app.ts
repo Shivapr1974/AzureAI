@@ -50,7 +50,14 @@ export class App {
         this.chatWindow.nativeElement.scrollHeight;
     } catch (err) {}
   }
+  startWorkflow(command: string): void {
+    if (this.loading) {
+      return;
+    }
 
+    this.question = command;
+    this.sendMessage();
+  }
   sendMessage(): void {
     const trimmedQuestion = this.question.trim();
 
