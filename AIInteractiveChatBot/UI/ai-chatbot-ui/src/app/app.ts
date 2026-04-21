@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
@@ -22,6 +22,7 @@ interface ChatMessage {
   styleUrl: './app.css'
 })
 export class App {
+  @ViewChild('chatWindow') chatWindow!: ElementRef;
   question = '';
   loading = false;
   uploadStatus = '';
@@ -41,6 +42,13 @@ export class App {
     private cdr: ChangeDetectorRef
   ) {}
 
+  scrollToBottom() {
+    try {
+      this.chatWindow.nativeElement.scrollTop =
+        this.chatWindow.nativeElement.scrollHeight;
+    } catch (err) {}
+  }
+
   sendMessage(): void {
     const trimmedQuestion = this.question.trim();
 
@@ -58,7 +66,7 @@ export class App {
           sender: 'bot',
           text: response.answer || 'No response received.'
         });
-
+        setTimeout(() => this.scrollToBottom(), 0);
         this.generatedUser = response.user ?? null;
         this.generatedStudent = response.student ?? null;
 
