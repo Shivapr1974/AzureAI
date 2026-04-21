@@ -205,3 +205,45 @@ def ask_llm(question: str, session: dict) -> str:
     )
 
     return safe_text(resp.choices[0].message.content).strip()
+
+
+
+def parse_classifier_response(text: str) -> dict:
+    try:
+        return json.loads(text)
+    except Exception:
+        return {
+            "intent": "chat",
+            "message": text
+        }
+
+
+def classify_workflow_input(message: str, expected_field: str, ask_llm_func, session: dict) -> dict:
+    prompt = f"""
+You are a classifier for an interactive form workflow.
+
+Expected field: {expected_field}
+
+Classify the user message into ONE of these:
+
+1. field_input
+2. chat
+3. cancel
+
+Return ONLY valid JSON in one of these forms:
+
+{{"intent":"field_input","field":"{expected_field}","value":"..."}}
+{{"intent":"chat"}}
+{{"intent":"cancel"}}
+
+Rules:
+- Return "field_input" only if the user clearly provides a value for the expected field.
+- Return "chat" if the user is asking a question, making a side comment, asking for clarification, refusing, or saying something that should not fill the field yet.
+- Return "cancel" only if the user clearly wants to stop or cancel the workflow.
+- Do not explain anything outside JSON.
+
+User message:
+{message}
+"""
+    raw = ask_llm_func(prompt, session)
+    return parse_classifier_response(raw)

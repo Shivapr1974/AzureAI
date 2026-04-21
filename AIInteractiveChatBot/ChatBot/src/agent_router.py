@@ -1,6 +1,10 @@
 import json
 import re
 
+from src.agents.create_bc_form_agent import CreateBCFormAgent
+from src.rag_pipeline import classify_workflow_input
+
+
 EMAIL_REGEX = r"^[^@\s]+@[^@\s]+\.[^@\s]+$"
 
 
@@ -48,47 +52,6 @@ def get_next_student_field(student: dict) -> str | None:
     if not student["grade"]:
         return "grade"
     return None
-
-
-def parse_classifier_response(text: str) -> dict:
-    try:
-        return json.loads(text)
-    except Exception:
-        return {
-            "intent": "chat",
-            "message": text
-        }
-
-
-def classify_workflow_input(message: str, expected_field: str, ask_llm_func, session: dict) -> dict:
-    prompt = f"""
-You are a classifier for an interactive form workflow.
-
-Expected field: {expected_field}
-
-Classify the user message into ONE of these:
-
-1. field_input
-2. chat
-3. cancel
-
-Return ONLY valid JSON in one of these forms:
-
-{{"intent":"field_input","field":"{expected_field}","value":"..."}}
-{{"intent":"chat"}}
-{{"intent":"cancel"}}
-
-Rules:
-- Return "field_input" only if the user clearly provides a value for the expected field.
-- Return "chat" if the user is asking a question, making a side comment, asking for clarification, refusing, or saying something that should not fill the field yet.
-- Return "cancel" only if the user clearly wants to stop or cancel the workflow.
-- Do not explain anything outside JSON.
-
-User message:
-{message}
-"""
-    raw = ask_llm_func(prompt, session)
-    return parse_classifier_response(raw)
 
 
 class CreateUserAgent:
@@ -279,6 +242,7 @@ class RouterAgent:
     def __init__(self):
         self.create_user_agent = CreateUserAgent()
         self.create_student_agent = CreateStudentAgent()
+        self.create_bc_form_agent = CreateBCFormAgent()
 
     async def run(self, message: str, session: dict, ask_llm_func) -> str | dict:
         lowered = message.lower().strip()
@@ -288,6 +252,10 @@ class RouterAgent:
 
         if session.get("mode") == "CREATE_STUDENT":
             return await self.create_student_agent.run(message, session, ask_llm_func)
+
+        if session.get("mode") == "CREATE_BC_FORM":
+            return await self.create_bc_form_agent.run(message, session, ask_llm_func)
+
 
         if lowered == "create user":
             session["mode"] = "CREATE_USER"
@@ -310,6 +278,23 @@ class RouterAgent:
                 "grade": ""
             }
             return "Sure. Enter student id:"
+        
+        if lowered == "create bc form":
+            session["mode"] = "CREATE_BC_FORM"
+            session["active_agent"] = "CreateBCFormAgent"
+            session["bcForm"] = {
+                "reqSubName": "Shiva Ram",
+                "intType": "",
+                "reqType": "",
+                "intName": "",
+                "inOverview": "",
+                "inHighlights": ""
+            }
+            return (
+                "BC Form started.\n"
+                "Req Sub Name is auto-populated as Shiva Ram.\n"
+                "Enter Int Type (IT, Data, IT & Data)."
+            )
 
         return ask_llm_func(message, session)
 

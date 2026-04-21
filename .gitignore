@@ -9,5 +9,5 @@ AIChatBot/.venv/
 /AIInteractiveChatBot/ChatBot/src/__pycache__
 /AIInteractiveChatBot/UI/ai-chatbot-ui/.vscode
 /AIInteractiveChatBot/ChatBot/chroma_db/
-
+/AIInteractiveChatBot/ChatBot/src/agents/__pycache__
 
