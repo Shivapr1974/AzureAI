@@ -1,0 +1,155 @@
+<section class="page" *ngIf="state">
+  <div class="workspace">
+    <section class="chat-panel card">
+      <header class="panel-header">
+        <div>
+          <p class="eyebrow">Chat Workspace</p>
+          <h2>Cora</h2>
+        </div>
+        <span class="state-pill">{{ state.mode }}</span>
+      </header>
+
+      <div class="status-banner">
+        {{ lastStatus }}
+      </div>
+
+      <div class="chip-row" *ngIf="suggestedChips.length">
+        <button
+          *ngFor="let chip of suggestedChips"
+          type="button"
+          class="chip"
+          (click)="applyChip(chip)"
+        >
+          {{ chip.label }}
+        </button>
+      </div>
+
+      <div class="chat-window">
+        <div class="empty-state" *ngIf="!state.chat.history.length">
+          Ask a grounded question, edit the BC form, or click a suggested chip to get started.
+        </div>
+
+        <article
+          *ngFor="let item of state.chat.history"
+          class="message"
+          [class.user]="item.role === 'user'"
+          [class.assistant]="item.role === 'assistant'"
+        >
+          <p class="message-role">{{ item.role === 'user' ? 'You' : 'Cora' }}</p>
+          <p class="message-text">{{ item.text }}</p>
+        </article>
+      </div>
+
+      <div class="composer">
+        <textarea
+          [(ngModel)]="message"
+          rows="4"
+          placeholder="Ask about the uploaded docs or describe the BC request."
+        ></textarea>
+        <button type="button" (click)="sendMessage()" [disabled]="busy">
+          {{ busy ? 'Working...' : 'Send' }}
+        </button>
+      </div>
+
+      <section class="retrieval-panel" *ngIf="state.retrieval.context.length">
+        <h3>Grounding Context</h3>
+        <div class="evidence" *ngFor="let item of state.retrieval.context">
+          <strong>{{ item.source }} · chunk {{ item.chunk }}</strong>
+          <p>{{ item.text }}</p>
+        </div>
+      </section>
+    </section>
+
+    <aside class="side-panel">
+      <section class="card form-card">
+        <div class="panel-header compact">
+          <div>
+            <p class="eyebrow">BC Form</p>
+            <h3>Editable Fields</h3>
+          </div>
+          <span class="state-pill neutral">Manual edits win</span>
+        </div>
+
+        <label>
+          Integration Type
+          <select [(ngModel)]="draftForm.intType">
+            <option value="">Select one</option>
+            <option value="IT">IT</option>
+            <option value="Data">Data</option>
+            <option value="IT & Data">IT & Data</option>
+          </select>
+        </label>
+
+        <label>
+          Request Type
+          <input [(ngModel)]="draftForm.reqType" type="text" />
+        </label>
+
+        <label>
+          Integration Name
+          <input [(ngModel)]="draftForm.intName" type="text" />
+        </label>
+
+        <label>
+          Integration Overview
+          <textarea [(ngModel)]="draftForm.inOverview" rows="4"></textarea>
+        </label>
+
+        <label>
+          Integration Highlights
+          <textarea [(ngModel)]="draftForm.inHighlights" rows="4"></textarea>
+        </label>
+
+        <div class="actions">
+          <button type="button" class="secondary" (click)="saveForm()" [disabled]="busy">
+            Save Draft
+          </button>
+          <button type="button" (click)="submitForReview()" [disabled]="busy">
+            Submit
+          </button>
+        </div>
+      </section>
+
+      <section class="card review-card">
+        <div class="panel-header compact">
+          <div>
+            <p class="eyebrow">Agent Review</p>
+            <h3>{{ state.review.status }}</h3>
+          </div>
+          <button type="button" class="secondary" (click)="rerunReview()" [disabled]="busy">
+            Run Review
+          </button>
+        </div>
+
+        <p class="mock-label" *ngIf="state.review.isMock">
+          Demo/mock scoring is enabled for this proof of concept.
+        </p>
+
+        <div class="score-strip" *ngIf="state.review.scores['overall']">
+          Overall Score:
+          <strong>{{ state.review.scores['overall'] }}</strong>
+        </div>
+
+        <p class="summary" *ngIf="state.review.summary">
+          {{ state.review.summary }}
+        </p>
+
+        <div
+          *ngFor="let agent of agentEntries(); trackBy: trackByAgent"
+          class="agent-card"
+        >
+          <div class="agent-head">
+            <strong>{{ agent[0] }}</strong>
+            <span>{{ agent[1].score }}</span>
+          </div>
+          <p>{{ agent[1].summary }}</p>
+
+          <div class="finding" *ngFor="let finding of agent[1].findings">
+            <strong>{{ finding.message }}</strong>
+            <p>{{ finding.recommendation }}</p>
+          </div>
+        </div>
+      </section>
+    </aside>
+  </div>
+</section>

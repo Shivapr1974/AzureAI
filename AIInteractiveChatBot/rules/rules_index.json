@@ -1,0 +1,29 @@
+{
+  "version": "1.0",
+  "agents": [
+    {
+      "name": "Security Agent",
+      "file": "security_agent_rules.json"
+    },
+    {
+      "name": "Data Agent",
+      "file": "data_agent_rules.json"
+    },
+    {
+      "name": "EA Agent",
+      "file": "ea_agent_rules.json"
+    },
+    {
+      "name": "Acquisition Agent",
+      "file": "acquisition_agent_rules.json"
+    },
+    {
+      "name": "Pattern Alignment Agent",
+      "file": "pattern_alignment_agent_rules.json"
+    },
+    {
+      "name": "Concept Composer",
+      "file": "concept_composer_rules.json"
+    }
+  ]
+}

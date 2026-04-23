@@ -2,22 +2,68 @@
 
 ## Application Overview
 
-**Application Name:** FormIQ AI  
-**Chat Assistant:** Cora
+Application Name: FormIQ AI  
+Chat Assistant: Cora
 
 FormIQ AI is an enterprise application with:
 - Angular frontend
 - FastAPI backend
 - OpenAI-powered conversational AI
-- ChromaDB-based RAG (Retrieval Augmented Generation)
+- ChromaDB-based RAG
 - Agent-based orchestration for form completion and review workflows
 
-UI Layout:
-- Left: Navigation (hamburger menu)
-- Center: Chatbot (Cora)
+Top-level pages:
+- Home
+- Chat
+- Documents
+
+---
+
+## UI Structure
+
+Home Page:
+- Landing page
+- Navigation entry
+
+Chat Page:
+- Left: navigation menu
+- Center: chat (Cora)
 - Right:
-  - Top: BC Form (editable)
-  - Bottom: Agent Review Workflow (after submit)
+  - Top: BC form
+  - Bottom: agent review results and scores
+
+Documents Page:
+- Upload documents
+- Manage documents
+- Index content into ChromaDB
+
+---
+
+## UI Theme
+
+Primary:
+- #0F766E
+- #3B82F6
+
+Secondary:
+- #E0F2F1
+- #F3F4F6
+
+Accent:
+- #10B981
+- #F59E0B
+- #EF4444
+
+Background:
+- #F9FAFB
+- #FFFFFF
+
+Agent Status:
+- Pending: gray
+- Running: blue
+- Completed: green
+- Needs Review: amber
+- Error: red
 
 ---
 
@@ -25,360 +71,303 @@ UI Layout:
 
 Frontend:
 - Angular SPA
-- Responsible for UI, form rendering, suggestion chips, and chat interface
-- Must NOT call OpenAI APIs directly
+- UI only
 
 Backend:
 - FastAPI
-- Owns:
-  - LLM interactions
-  - Agent orchestration
-  - Validation and scoring
+- Handles:
+  - OpenAI calls
+  - agent orchestration
   - RAG retrieval
-  - Session and form state
+  - validation
+  - scoring
+  - document ingestion
+  - state management
 
-LLM:
-- OpenAI models
-- Used for:
-  - extraction
-  - reasoning
-  - summarization
-  - conversational responses
-
-RAG:
-- ChromaDB vector store
-- Mandatory for all LLM interactions
+Frontend must NOT:
+- call OpenAI
+- store secrets
 
 ---
 
 ## Agent Framework
 
-For now, use Microsoft Agent Framework concepts and patterns.
+- Router agent
+- Specialized agents
+- Tool-based execution
+- RAG grounding
 
-Follow a lightweight agent orchestration model:
-- Router Agent determines intent and mode
-- Specialized agents handle specific responsibilities
-- Agents may use tools (RAG, validation, scoring)
-- Agents may call LLM (must use RAG)
-
-Do NOT tightly couple implementation to framework-specific runtime/session objects.
+Do NOT depend on framework session objects.
 
 ---
 
-## Portability and State
+## POC Rule
 
-Session and state must be application-owned and framework-agnostic.
-
-Maintain separate models for:
-- session state
-- form state
-- chat history
-- retrieval context
-- agent results
-- scoring outputs
-
-Do NOT rely on framework-managed session objects as the source of truth.
-
-Design must allow future migration to:
-- LangGraph
-- OpenAI Agents SDK
-- Microsoft Agent Framework runtime
-
----
-
-## Chat Assistant: Cora
-
-Cora is:
-- helpful, concise, professional
-- conversational but not overly casual
-- capable of:
-  - form guidance
-  - clarification
-  - RAG-grounded answers
-  - light conversational responses (e.g., jokes)
-
-Cora must:
-- preserve form context during chat
-- never lose user progress
-- guide users toward completion
-- respect user edits over inferred values
-
----
-
-## BC Form Definition
-
-Fields:
-
-- intType (allowed: IT, Data, IT & Data)
-- reqType (free text)
-- intName (free text)
-- inOverview (free text)
-- inHighlights (free text)
-
----
-
-## Form Behavior Rules
-
-- All form fields must remain editable at all times
-- Users can:
-  - manually edit any field
-  - override AI suggestions
-  - revisit previous sections
+POC is reference only.
 
 Do NOT:
-- lock fields after AI population
-- enforce rigid step-by-step wizard flow
+- copy business logic
+- treat as final implementation
+
+AGENTS.md overrides POC.
+
+---
+
+## Application State
+
+Single structure to manage:
+- sessionId
+- mode
+- form data
+- chat history
+- retrieval context
+- review status
+- agent results
+- scores
+
+{
+  "sessionId": "",
+  "mode": "CHAT",
+  "form": {},
+  "chat": { "history": [] },
+  "retrieval": {},
+  "review": {
+    "status": "NOT_STARTED",
+    "agentResults": {},
+    "scores": {}
+  }
+}
+
+Must be portable to Redis.
+
+---
+
+## BC Form
+
+Fields:
+- intType (IT, Data, IT & Data)
+- reqType
+- intName
+- inOverview
+- inHighlights
+
+---
+
+## Form Rules
+
+- All fields editable
+- No locking
+- No strict wizard
 
 ---
 
 ## Source of Truth
 
-Application-owned form state is the source of truth.
-
 Priority:
-1. Manual user edits
-2. Explicit suggestion selection
-3. AI-extracted values
+1. Manual edits
+2. Chip selections
+3. AI inference
 
 ---
 
-## Suggested Values (Chips)
+## Suggested Chips
 
-Fields may have suggestion chips.
+Must be context-aware
 
-Rules:
-- support single-select (e.g., intType)
-- support multi-select (e.g., highlights)
-- user can:
-  - select suggestions
-  - combine with manual input
+Based on:
+- current question
+- form state
+- RAG context
 
-Suggestions:
-- update form state
-- may be passed to chat as structured context
+### Behavior
+- Update form
+- Become part of chat input/context
+- Treated as user input
 
-Do NOT restrict users to suggestions unless field is constrained.
+### Support
+- Single-select (intType)
+- Multi-select (highlights)
 
 ---
 
-## Chat Interaction Modes
+## Chat Intent Model
 
-Every message must be classified:
-
+Supported intents:
 - FORM_UPDATE
 - FORM_QUESTION
 - GENERAL_CHAT
 - DOC_QUESTION
 - SUBMIT_ACTION
-
-Do NOT assume all messages are form inputs.
-
-Examples:
-- "IT integration" → FORM_UPDATE
-- "What is intType?" → FORM_QUESTION
-- "Tell me a joke" → GENERAL_CHAT
+- CHIP_SELECTION
 
 ---
 
-## Mandatory RAG Rule
+## Mandatory RAG
 
-ALL LLM calls MUST use RAG:
+All LLM calls must:
+- Retrieve from ChromaDB
+- Build grounded prompt
+- Call model
 
-Applies to:
-- chat responses
-- clarification
-- field suggestions
-- all agents
-- report generation
-
-Process:
-1. Retrieve context from ChromaDB
-2. Build prompt with:
-   - user input
-   - form state
-   - chat history (trimmed)
-   - retrieved context
-3. Call LLM
-
-If no useful context:
-- explicitly say so
-- do NOT hallucinate
+No hallucination.
 
 ---
 
-## Document Upload (ChromaDB)
+## Document Upload
 
-Angular must support file upload.
+Separate page.
 
-Backend must:
-- accept files
-- extract text (PDF/TXT)
-- chunk text
-- embed using OpenAI
+Backend:
+- extract text
+- chunk
+- embed
 - store in ChromaDB
-
-Store metadata:
-- documentId
-- fileName
-- uploadedAt
-- chunkNumber
-- source/type
-
-Upload must be independent of chat logic.
 
 ---
 
 ## Agent Workflow
 
-### Pre-Submit
+Pre-submit:
+- chat + form fill
 
-User:
-→ Chat with Cora
-→ Form gradually filled via chat + UI
+Post-submit:
+- run agents
+- aggregate
+- generate summary
+- display results
 
 ---
 
-### Post-Submit Workflow
-
-1. Router sets mode = REVIEW_RUNNING
-
-2. Review Orchestrator triggers agents:
+## Review Agents
 
 - Security Agent
 - Data Agent
-- Enterprise Architect Agent
+- EA Agent
 - Acquisition Agent
 - Pattern Alignment Agent
-
-3. Agents run (prefer parallel execution)
-
-4. Aggregate results
-
-5. Concept Composer generates final report
-
-6. Return results to UI
+- Concept Composer
 
 ---
 
-## Agent Responsibilities
+## Agent Rules
 
-Security Agent:
-- security controls, encryption, access, compliance
-
-Data Agent:
-- classification, privacy, retention, handling
-
-EA Agent:
-- architecture, integration, scalability
-
-Acquisition Agent:
-- vendor, contracts, SLAs
-
-Pattern Alignment:
-- approved patterns, anti-patterns
-
-Concept Composer:
-- final summary/report
+Each agent:
+- single responsibility
+- structured input/output
+- uses RAG
 
 ---
 
-## Agent Design Rules
+## Review Results
 
-Each agent must:
-- have one responsibility
-- accept structured input
-- return structured JSON
-- use RAG before LLM
-
-Do NOT:
-- mix multiple responsibilities
-- embed orchestration inside agents
-- bypass router
+Must display:
+- agent status
+- findings
+- scores
+- final summary
 
 ---
 
-## Scoring Rules
+## Mock Scoring
 
-- scoring must be deterministic (Python)
-- do NOT rely on LLM for final scores
-
-Example:
-- Rubric = 70%
-- Pattern = 30%
+Allowed:
+- random/demo scores
+- must be labeled
 
 ---
 
-## UX Behavior
+## JSON Rules
 
-- user can interrupt flow anytime
-- small talk allowed
-- form progress must persist
+Folder: /rules/
 
-Example:
-User: "Tell me a joke"
-Cora:
-- responds with joke
-- continues guidance
+Files:
+- rules_index.json
+- common_rule_model.json
+- security_agent_rules.json
+- data_agent_rules.json
+- ea_agent_rules.json
+- acquisition_agent_rules.json
+- pattern_alignment_agent_rules.json
+- concept_composer_rules.json
 
 ---
 
-## API Design
+## Rule Structure
 
-Separate endpoints:
+Each rule:
+- id
+- enabled
+- priority
+- condition
+- message
+- recommendation
+- scoreImpact
 
+---
+
+## Codex Behavior
+
+Codex must:
+- create rules if missing
+- update JSON instead of hardcoding
+
+---
+
+## Rule Priority
+
+- JSON rules
+- Python logic
+- LLM
+
+---
+
+## API
+
+Endpoints:
 - /chat
-- /upload
 - /submit
 - /review
+- /upload
+- /documents
 - /search-docs
-
-Return consistent JSON:
-- answer
-- form state
-- missing fields
-- agent status
-- scores
 
 ---
 
-## Security Rules
+## Security
 
-- never expose API keys in frontend
-- use environment variables
+- No API keys in frontend
+- Use env variables
 - sanitize uploads
-- avoid logging sensitive data
 
 ---
 
 ## Coding Rules
 
-- keep modules small and focused
-- use type hints
-- keep prompts separate
-- keep business logic in Python
+- Small modules
+- Clear naming
+- Logic in Python or JSON
+- Avoid lock-in
 
 ---
 
 ## Do NOT
 
-- do not call OpenAI from Angular
-- do not skip RAG
-- do not hallucinate values
-- do not lock form fields
-- do not depend on framework session objects
-- do not mix orchestration and agent logic
+- call OpenAI from Angular
+- skip RAG
+- lock fields
+- trust POC blindly
+- hardcode rules
 
 ---
 
 ## Definition of Done
 
-A change is complete only if:
-
-- UI works (left/center/right layout)
-- chat + form coexist
-- RAG is used
-- form remains editable
-- suggestions work
-- agent workflow executes correctly
-- no secrets exposed
-- behavior matches AGENTS.md
+- Home / Chat / Documents pages exist
+- Chat + form coexist
+- Chips feed into chat
+- Form editable
+- RAG used everywhere
+- Agents run
+- Results displayed
+- JSON rules present
+- No secrets exposed

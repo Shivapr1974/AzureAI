@@ -1,0 +1,31 @@
+{
+  "agent": "Concept Composer",
+  "ragQuery": "business concept summary stakeholder value integration scope",
+  "rules": [
+    {
+      "id": "composer_missing_core_fields",
+      "enabled": true,
+      "priority": 1,
+      "condition": {
+        "type": "field_empty",
+        "field": "intName"
+      },
+      "message": "The form is missing the core concept name needed for a clean summary.",
+      "recommendation": "Fill in the integration name before finalizing the concept summary.",
+      "scoreImpact": -10
+    },
+    {
+      "id": "composer_missing_business_value",
+      "enabled": true,
+      "priority": 2,
+      "condition": {
+        "type": "length_below",
+        "field": "inOverview",
+        "minimum": 30
+      },
+      "message": "The concept summary lacks enough business-value detail to be review-ready.",
+      "recommendation": "Expand the overview with the problem statement and desired outcome.",
+      "scoreImpact": -10
+    }
+  ]
+}

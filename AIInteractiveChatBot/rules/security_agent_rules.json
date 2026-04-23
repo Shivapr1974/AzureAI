@@ -1,0 +1,31 @@
+{
+  "agent": "Security Agent",
+  "ragQuery": "security controls identity access data protection",
+  "rules": [
+    {
+      "id": "security_missing_overview",
+      "enabled": true,
+      "priority": 1,
+      "condition": {
+        "type": "field_empty",
+        "field": "inOverview"
+      },
+      "message": "Security review cannot assess the request because the integration overview is empty.",
+      "recommendation": "Add a short overview describing the business need and the systems involved.",
+      "scoreImpact": -18
+    },
+    {
+      "id": "security_missing_keywords",
+      "enabled": true,
+      "priority": 2,
+      "condition": {
+        "type": "missing_keywords",
+        "field": "inHighlights",
+        "keywords": ["security"]
+      },
+      "message": "Security considerations are not called out in the integration highlights.",
+      "recommendation": "Mention authentication, authorization, network controls, or data protection expectations in the highlights.",
+      "scoreImpact": -12
+    }
+  ]
+}

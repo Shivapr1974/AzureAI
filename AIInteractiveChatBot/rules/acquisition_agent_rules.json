@@ -1,0 +1,31 @@
+{
+  "agent": "Acquisition Agent",
+  "ragQuery": "vendor procurement acquisition support licensing",
+  "rules": [
+    {
+      "id": "acquisition_missing_request_type",
+      "enabled": true,
+      "priority": 1,
+      "condition": {
+        "type": "field_empty",
+        "field": "reqType"
+      },
+      "message": "The request type is missing, so acquisition cannot determine the correct intake path.",
+      "recommendation": "Identify whether this is a new request, enhancement, renewal, or change.",
+      "scoreImpact": -12
+    },
+    {
+      "id": "acquisition_missing_highlights",
+      "enabled": true,
+      "priority": 2,
+      "condition": {
+        "type": "length_below",
+        "field": "inHighlights",
+        "minimum": 20
+      },
+      "message": "Acquisition needs a clearer highlights section to understand dependencies and delivery scope.",
+      "recommendation": "Summarize timeline, delivery partners, and any procurement touchpoints in the highlights field.",
+      "scoreImpact": -9
+    }
+  ]
+}

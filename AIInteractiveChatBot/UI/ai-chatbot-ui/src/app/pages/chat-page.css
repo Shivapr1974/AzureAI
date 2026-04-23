@@ -1,0 +1,253 @@
+.page {
+  min-height: calc(100vh - 3rem);
+}
+
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.95fr);
+  gap: 1.25rem;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
+  border-radius: 1.5rem;
+  box-shadow: 0 18px 35px rgba(15, 23, 42, 0.08);
+}
+
+.chat-panel,
+.form-card,
+.review-card {
+  padding: 1.25rem;
+}
+
+.side-panel {
+  display: grid;
+  gap: 1rem;
+  align-content: start;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.panel-header.compact {
+  margin-bottom: 0.8rem;
+}
+
+.panel-header h2,
+.panel-header h3 {
+  margin: 0.25rem 0 0;
+}
+
+.eyebrow {
+  margin: 0;
+  color: var(--navy-700);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.72rem;
+}
+
+.state-pill {
+  display: inline-flex;
+  padding: 0.35rem 0.8rem;
+  border-radius: 999px;
+  background: var(--blue-100);
+  color: var(--navy-700);
+  font-size: 0.8rem;
+}
+
+.state-pill.neutral {
+  background: var(--sky-100);
+  color: var(--navy-700);
+}
+
+.status-banner {
+  padding: 0.9rem 1rem;
+  border-radius: 1rem;
+  background: #eef4ff;
+  color: var(--navy-700);
+  margin-bottom: 1rem;
+}
+
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-bottom: 1rem;
+}
+
+.chip {
+  border: none;
+  border-radius: 999px;
+  padding: 0.6rem 0.9rem;
+  background: var(--blue-50);
+  color: var(--navy-700);
+  cursor: pointer;
+}
+
+.chat-window {
+  min-height: 340px;
+  max-height: 56vh;
+  overflow: auto;
+  padding-right: 0.4rem;
+  display: grid;
+  gap: 0.9rem;
+}
+
+.empty-state {
+  padding: 1rem;
+  border-radius: 1rem;
+  background: #f8fafc;
+  color: #64748b;
+}
+
+.message {
+  max-width: 90%;
+  padding: 0.95rem 1rem;
+  border-radius: 1.2rem;
+}
+
+.message.user {
+  justify-self: end;
+  background: linear-gradient(135deg, var(--navy-800), var(--navy-900));
+  color: white;
+}
+
+.message.assistant {
+  background: var(--surface-strong);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+}
+
+.message-role {
+  margin: 0 0 0.35rem;
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.message-text {
+  margin: 0;
+  white-space: pre-wrap;
+  line-height: 1.55;
+}
+
+.composer {
+  margin-top: 1rem;
+  display: grid;
+  gap: 0.8rem;
+}
+
+textarea,
+input,
+select {
+  width: 100%;
+  border-radius: 1rem;
+  border: 1px solid rgba(100, 116, 139, 0.28);
+  padding: 0.9rem 1rem;
+  font: inherit;
+  box-sizing: border-box;
+  background: #fff;
+}
+
+button {
+  border: none;
+  border-radius: 1rem;
+  padding: 0.9rem 1rem;
+  background: var(--navy-900);
+  color: white;
+  font: inherit;
+  cursor: pointer;
+}
+
+button.secondary {
+  background: var(--blue-50);
+  color: var(--navy-700);
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.retrieval-panel {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.22);
+}
+
+.retrieval-panel h3 {
+  margin-top: 0;
+}
+
+.evidence {
+  padding: 0.85rem 0;
+  border-top: 1px solid rgba(148, 163, 184, 0.18);
+}
+
+.evidence:first-of-type {
+  border-top: none;
+}
+
+.evidence p {
+  margin: 0.35rem 0 0;
+  color: #475569;
+}
+
+label {
+  display: grid;
+  gap: 0.45rem;
+  margin-bottom: 0.9rem;
+  color: #334155;
+}
+
+.actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.mock-label,
+.summary {
+  color: var(--text-muted);
+}
+
+.score-strip {
+  padding: 0.8rem 1rem;
+  background: var(--blue-50);
+  color: var(--navy-700);
+  border-radius: 1rem;
+  margin-bottom: 1rem;
+}
+
+.agent-card {
+  border-top: 1px solid rgba(148, 163, 184, 0.22);
+  padding-top: 0.9rem;
+  margin-top: 0.9rem;
+}
+
+.agent-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.finding {
+  margin-top: 0.65rem;
+  padding: 0.85rem;
+  border-radius: 1rem;
+  background: #eef4ff;
+}
+
+.finding p {
+  margin-bottom: 0;
+}
+
+@media (max-width: 1200px) {
+  .workspace {
+    grid-template-columns: 1fr;
+  }
+}

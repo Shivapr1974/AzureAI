@@ -1,0 +1,31 @@
+{
+  "agent": "Pattern Alignment Agent",
+  "ragQuery": "integration patterns api batch event architecture alignment",
+  "rules": [
+    {
+      "id": "pattern_missing_integration_type",
+      "enabled": true,
+      "priority": 1,
+      "condition": {
+        "type": "field_empty",
+        "field": "intType"
+      },
+      "message": "Pattern alignment cannot start because the integration type is missing.",
+      "recommendation": "Select the integration type so the solution can be aligned to the correct architecture pattern.",
+      "scoreImpact": -16
+    },
+    {
+      "id": "pattern_missing_pattern_terms",
+      "enabled": true,
+      "priority": 2,
+      "condition": {
+        "type": "missing_keywords",
+        "field": "inOverview",
+        "keywords": ["integration"]
+      },
+      "message": "The overview does not describe the integration pattern or interaction style.",
+      "recommendation": "Add language about the interface, flow, API, event, or data exchange pattern.",
+      "scoreImpact": -8
+    }
+  ]
+}

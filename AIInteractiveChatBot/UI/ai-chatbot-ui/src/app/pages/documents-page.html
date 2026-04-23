@@ -1,0 +1,58 @@
+<section class="documents-page" *ngIf="state">
+  <div class="documents-grid">
+    <section class="card upload-card">
+      <p class="eyebrow">Documents</p>
+      <h2>Upload and Index</h2>
+      <p class="status">{{ uploadStatus }}</p>
+
+      <label class="upload-control">
+        <span>Select file</span>
+        <input type="file" accept=".txt,.pdf" (change)="onFileSelected($event)" />
+      </label>
+    </section>
+
+    <section class="card list-card">
+      <p class="eyebrow">Indexed Sources</p>
+      <h2>Document Library</h2>
+      <div class="doc-list" *ngIf="state.retrieval.documents.length; else noDocs">
+        <article *ngFor="let doc of state.retrieval.documents" class="doc-item">
+          <strong>{{ doc.source }}</strong>
+          <span>{{ doc.chunkCount }} chunks</span>
+        </article>
+      </div>
+
+      <ng-template #noDocs>
+        <p class="empty">No documents are indexed yet.</p>
+      </ng-template>
+    </section>
+  </div>
+
+  <section class="card search-card">
+    <div class="search-head">
+      <div>
+        <p class="eyebrow">Search</p>
+        <h2>ChromaDB Lookup</h2>
+      </div>
+      <button type="button" (click)="searchDocs()" [disabled]="busy">Search</button>
+    </div>
+
+    <div class="search-row">
+      <input
+        [(ngModel)]="searchQuery"
+        type="text"
+        placeholder="Search uploaded document context"
+      />
+    </div>
+
+    <div class="results" *ngIf="searchResults.length; else noResults">
+      <article *ngFor="let result of searchResults" class="result-item">
+        <strong>{{ result.source }} · chunk {{ result.chunk }}</strong>
+        <p>{{ result.text }}</p>
+      </article>
+    </div>
+
+    <ng-template #noResults>
+      <p class="empty">Run a search to inspect grounded context.</p>
+    </ng-template>
+  </section>
+</section>

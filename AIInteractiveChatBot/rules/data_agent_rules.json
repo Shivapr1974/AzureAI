@@ -1,0 +1,32 @@
+{
+  "agent": "Data Agent",
+  "ragQuery": "data classification data sharing pii retention",
+  "rules": [
+    {
+      "id": "data_missing_type",
+      "enabled": true,
+      "priority": 1,
+      "condition": {
+        "type": "field_not_in",
+        "field": "intType",
+        "allowed": ["it", "data", "it & data"]
+      },
+      "message": "The integration type is missing or invalid for data review.",
+      "recommendation": "Select one of the supported integration types before requesting data review.",
+      "scoreImpact": -15
+    },
+    {
+      "id": "data_missing_sharing_language",
+      "enabled": true,
+      "priority": 2,
+      "condition": {
+        "type": "missing_keywords",
+        "field": "inHighlights",
+        "keywords": ["data"]
+      },
+      "message": "The highlights do not explain whether data will be exchanged, transformed, or stored.",
+      "recommendation": "Clarify the data movement or storage pattern in the highlights field.",
+      "scoreImpact": -10
+    }
+  ]
+}

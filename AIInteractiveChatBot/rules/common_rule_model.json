@@ -1,0 +1,15 @@
+{
+  "description": "Reference structure for FormIQ review rules.",
+  "ruleTemplate": {
+    "id": "agent_rule_id",
+    "enabled": true,
+    "priority": 1,
+    "condition": {
+      "type": "field_empty",
+      "field": "intName"
+    },
+    "message": "Describe the issue that should be shown to the user.",
+    "recommendation": "Describe the recommended next action.",
+    "scoreImpact": -10
+  }
+}

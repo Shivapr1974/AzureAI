@@ -1,1 +1,33 @@
-/* You can add global styles to this file, and also import other style files */
+html {
+  --navy-950: #081224;
+  --navy-900: #0f1b36;
+  --navy-800: #16284d;
+  --navy-700: #1f3a6d;
+  --blue-200: #bfdbfe;
+  --blue-100: #dbeafe;
+  --blue-50: #eff6ff;
+  --sky-100: #e0f2fe;
+  --surface: rgba(255, 255, 255, 0.94);
+  --surface-strong: rgba(255, 255, 255, 0.98);
+  --border-soft: rgba(30, 64, 175, 0.14);
+  --text-main: #0f172a;
+  --text-muted: #475569;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  font-family: Aptos, "Segoe UI", "Trebuchet MS", sans-serif;
+  color: var(--text-main);
+  background:
+    radial-gradient(circle at top left, rgba(96, 165, 250, 0.2), transparent 28%),
+    linear-gradient(180deg, #f8fbff 0%, #eaf3ff 100%);
+}
+
+* {
+  box-sizing: border-box;
+}

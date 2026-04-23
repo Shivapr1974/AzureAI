@@ -1,76 +1,30 @@
-<div class="chat-container">
-  <h2>AI Chatbot</h2>
-
-  <div class="upload-row">
-    <input type="file" (change)="onFileSelected($event)" accept=".txt,.pdf" />
-    <span class="upload-status">{{ uploadStatus }}</span>
-  </div>
-
-    <!-- <div class="workflow-bar">
-    <button type="button" (click)="startWorkflow('create user')" [disabled]="loading">
-      Create User
-    </button>
-
-    <button type="button" (click)="startWorkflow('create student')" [disabled]="loading">
-      Create Student
-    </button>
-
-    <button type="button" (click)="startWorkflow('create bc form')" [disabled]="loading">
-      Create BC Form
-    </button>
-  </div> -->
-
-    <div class="chat-window" #chatWindow>
-        <div class="chat-bands">
-      <div class="chat-band" (click)="startWorkflow('create user')">
-        Create User
-      </div>
-
-      <div class="chat-band" (click)="startWorkflow('create student')">
-        Create Student
-      </div>
-
-      <div class="chat-band" (click)="startWorkflow('create bc form')">
-        Create BC Form
-      </div>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="brand">
+      <p class="eyebrow">FormIQ AI</p>
+      <h1>Cora</h1>
+      <p class="subtitle">Grounded intake, editable business case forms, and agent review workflows.</p>
     </div>
-    <div
-      *ngFor="let message of messages"
-      class="message"
-      [ngClass]="message.sender"
-    >
-      <strong>{{ message.sender === 'user' ? 'You' : 'Bot' }}:</strong>
-     <div class="message-text" [innerHTML]="message.text"></div>
-    </div>
-  </div>
 
-  <div class="input-row">
-    <input
-      type="text"
-      [(ngModel)]="question"
-      placeholder="Type your question..."
-      (keyup.enter)="sendMessage()"
-    />
-    <button (click)="sendMessage()" [disabled]="loading">
-      {{ loading ? 'Sending...' : 'Send' }}
+    <nav class="nav">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Home</a>
+      <a routerLink="/chat" routerLinkActive="active">Chat</a>
+      <a routerLink="/documents" routerLinkActive="active">Documents</a>
+    </nav>
+
+    <button type="button" class="reset-button" (click)="startFresh()" [disabled]="resetting">
+      {{ resetting ? 'Resetting...' : 'Start New Session' }}
     </button>
-  </div>
 
-  <div class="result-panel" *ngIf="generatedUser">
-    <h3>Created User</h3>
-    <pre>{{ generatedUser | json }}</pre>
-  </div>
+    <section class="status-card" *ngIf="state$ | async as state">
+      <p class="card-label">Session</p>
+      <p class="session-id">{{ state.sessionId }}</p>
+      <p class="card-label">Review Status</p>
+      <span class="status-pill">{{ state.review.status }}</span>
+    </section>
+  </aside>
 
-  <div class="result-panel" *ngIf="generatedStudent">
-    <h3>Created Student</h3>
-    <pre>{{ generatedStudent | json }}</pre>
-  </div>
-  <div class="result-panel" *ngIf="generatedBcForm">
-    <h3>Generated BC Form</h3>
-    <pre>{{ generatedBcForm | json }}</pre>
-  </div>
-
-  <div class="result-panel" *ngIf="agentStatus">
-    <p><strong>Status:</strong> {{ agentStatus }}</p>
-  </div>
+  <main class="content">
+    <router-outlet></router-outlet>
+  </main>
 </div>

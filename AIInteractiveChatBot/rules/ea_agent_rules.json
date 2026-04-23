@@ -1,0 +1,31 @@
+{
+  "agent": "EA Agent",
+  "ragQuery": "enterprise architecture integration pattern target state",
+  "rules": [
+    {
+      "id": "ea_missing_name",
+      "enabled": true,
+      "priority": 1,
+      "condition": {
+        "type": "field_empty",
+        "field": "intName"
+      },
+      "message": "Enterprise Architecture needs the integration name to evaluate reuse and ownership.",
+      "recommendation": "Provide a clear integration name that reflects the business capability or system interface.",
+      "scoreImpact": -14
+    },
+    {
+      "id": "ea_short_overview",
+      "enabled": true,
+      "priority": 2,
+      "condition": {
+        "type": "length_below",
+        "field": "inOverview",
+        "minimum": 40
+      },
+      "message": "The overview is too short to validate the target-state architecture.",
+      "recommendation": "Expand the overview with systems, scope, and expected outcome.",
+      "scoreImpact": -8
+    }
+  ]
+}

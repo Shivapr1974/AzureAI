@@ -1,0 +1,102 @@
+.documents-page {
+  display: grid;
+  gap: 1rem;
+}
+
+.documents-grid {
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: 1rem;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
+  border-radius: 1.5rem;
+  box-shadow: 0 18px 35px rgba(15, 23, 42, 0.08);
+  padding: 1.4rem;
+}
+
+.eyebrow {
+  margin: 0;
+  color: var(--navy-700);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.72rem;
+}
+
+h2 {
+  margin-top: 0.35rem;
+}
+
+.status,
+.empty,
+.result-item p,
+.doc-item span {
+  color: #475569;
+}
+
+.upload-control {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.doc-list,
+.results {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.doc-item,
+.result-item {
+  padding: 0.95rem 1rem;
+  border-radius: 1rem;
+  background: #f7faff;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+}
+
+.doc-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.search-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.search-row input {
+  width: 100%;
+  border-radius: 1rem;
+  border: 1px solid rgba(100, 116, 139, 0.28);
+  padding: 0.9rem 1rem;
+  font: inherit;
+  box-sizing: border-box;
+}
+
+button {
+  border: none;
+  border-radius: 1rem;
+  padding: 0.9rem 1rem;
+  background: var(--navy-900);
+  color: white;
+  font: inherit;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 1100px) {
+  .documents-grid {
+    grid-template-columns: 1fr;
+  }
+}
