@@ -39,6 +39,15 @@ GENERAL_CHAT_MARKERS = (
     "tell me",
     "write me",
 )
+EXPLICIT_FORM_REQUEST_TERMS = (
+    "bc form",
+    "business case form",
+    "open bc form",
+    "show bc form",
+    "fill bc form",
+    "fill out bc form",
+    "start bc form",
+)
 
 
 def infer_intent(message: str, chip: Any | None = None) -> str:
@@ -46,14 +55,12 @@ def infer_intent(message: str, chip: Any | None = None) -> str:
         return "CHIP_SELECTION"
 
     lowered = message.lower().strip()
-    if any(term in lowered for term in ["bc form", "business case form", "fill a form", "start a form"]):
+    if any(term in lowered for term in EXPLICIT_FORM_REQUEST_TERMS):
         return "FORM_QUESTION"
     if any(term in lowered for term in ["submit", "run review", "review this", "score this"]):
         return "SUBMIT_ACTION"
     if any(term in lowered for term in ["document", "upload", "source", "policy", "search docs"]):
         return "DOC_QUESTION"
-    if any(term in lowered for term in ["int type", "req type", "integration", "overview", "highlight"]):
-        return "FORM_QUESTION"
     if detect_form_updates(message):
         return "FORM_UPDATE"
     return "GENERAL_CHAT"
@@ -132,6 +139,10 @@ def set_guided_mode(state: dict, enabled: bool) -> None:
     state["mode"] = "GUIDED_FORM" if enabled else "CHAT"
 
 
+def set_form_requested(state: dict, requested: bool) -> None:
+    state.setdefault("ui", {})["formRequested"] = requested
+
+
 def save_guided_field_value(state: dict, field: str, value: str) -> str | None:
     cleaned = value.strip()
     if not cleaned:
@@ -169,6 +180,7 @@ def handle_guided_form_turn(state: dict, message: str) -> dict:
     lowered = message.lower().strip()
     if lowered in GUIDED_CANCEL_TERMS:
         set_guided_mode(state, False)
+        set_form_requested(state, False)
         return create_response_payload(
             state,
             answer="Guided BC form flow cancelled. Your current values are still kept in the form.",
@@ -364,12 +376,14 @@ def handle_chat_turn(state: dict, message: str, chip: Any | None = None) -> dict
     if intent == "FORM_UPDATE":
         updates = detect_form_updates(cleaned)
         if updates:
+            set_form_requested(state, True)
             apply_form_updates(state, updates, source="MANUAL_EDIT")
             changed = ", ".join(updates.keys())
             answer = f"Updated the BC form from chat input: {changed}."
             return create_response_payload(state, answer=answer, intent=intent)
 
     if intent == "FORM_QUESTION":
+        set_form_requested(state, True)
         set_guided_mode(state, True)
         answer = build_next_guided_response(
             state,

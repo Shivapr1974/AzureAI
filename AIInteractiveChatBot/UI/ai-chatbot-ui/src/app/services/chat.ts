@@ -62,6 +62,9 @@ export interface RetrievalState {
 export interface AppState {
   sessionId: string;
   mode: string;
+  ui?: {
+    formRequested?: boolean;
+  };
   form: FormState;
   chat: {
     history: ChatHistoryItem[];

@@ -250,8 +250,9 @@ def build_grounded_prompt(question: str, state: dict, contexts: list[dict]) -> s
     return f"""
 You are Cora, the FormIQ AI assistant.
 
-Stay grounded in the retrieved document context and the BC form state.
-If the answer is not supported by the retrieved context, say that clearly and ask the user to upload more documents or edit the form manually.
+Use the retrieved document context when helpful.
+Use the BC form state when it helps answer the question.
+Allow non-grounded replies when the retrieved context is missing or not useful for the user's question.
 Do not hallucinate.
 Keep the response concise and easy to act on.
 
@@ -260,6 +261,33 @@ BC Form State:
 
 Retrieved Context:
 {retrieval_context}
+
+User Question:
+{question}
+""".strip()
+
+
+def build_fallback_prompt(question: str, state: dict) -> str:
+    form = state.get("form", {})
+    form_context = "\n".join(
+        f"- {field}: {value or 'Not provided'}"
+        for field, value in form.items()
+    )
+
+    return f"""
+You are Cora, the FormIQ AI assistant.
+
+No useful retrieved document context was found for this message.
+You should still answer helpfully and naturally.
+
+Rules:
+- If the user is making normal conversation, respond normally.
+- If the user is asking about the BC form, use the current form state when helpful.
+- If the user appears to want document-backed facts, be honest that no useful supporting document context was found.
+- Keep the answer concise and easy to act on.
+
+Current BC Form State:
+{form_context}
 
 User Question:
 {question}
@@ -276,38 +304,14 @@ def grounded_answer(question: str, state: dict) -> tuple[str, list[dict]]:
     if not contexts:
         if client is None:
             return (
-                "I could not find matching document context, but you can still keep chatting with me. "
+                "I could not find document context, but you can still keep chatting with me. "
                 "If you want grounded document answers, upload files on the Documents page.",
                 contexts,
             )
 
-        form = state.get("form", {})
-        form_context = "\n".join(
-            f"- {field}: {value or 'Not provided'}"
-            for field, value in form.items()
-        )
-        fallback_prompt = f"""
-You are Cora, the FormIQ AI assistant.
-
-No relevant RAG context was found for this message.
-You should still answer helpfully and naturally.
-
-Rules:
-- If the user is making normal conversation, respond normally.
-- If the user is asking for help with the BC form, use the current form state.
-- If the user seems to want document-backed information, be honest that no supporting document context was found.
-- Keep the answer concise and easy to act on.
-
-Current BC Form State:
-{form_context}
-
-User Question:
-{question}
-""".strip()
-
         response = client.chat.completions.create(
             model="gpt-4o-mini",
-            messages=[{"role": "user", "content": fallback_prompt}],
+            messages=[{"role": "user", "content": build_fallback_prompt(question, state)}],
             temperature=0.4,
             max_tokens=300,
         )
@@ -317,7 +321,7 @@ User Question:
     if client is None:
         first = contexts[0]
         return (
-            f"I found supporting context in {first['source']} but OPENAI_API_KEY is not configured, so I can’t generate a grounded summary yet.",
+            f"I found supporting context in {first['source']} but OPENAI_API_KEY is not configured, so I cannot generate a grounded summary yet.",
             contexts,
         )
 
@@ -325,7 +329,7 @@ User Question:
     response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[{"role": "user", "content": prompt}],
-        temperature=0.1,
+        temperature=0.2,
         max_tokens=400,
     )
     answer = response.choices[0].message.content or ""

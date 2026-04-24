@@ -25,6 +25,9 @@ def build_initial_state(session_id: str | None = None) -> dict:
     return {
         "sessionId": resolved_session_id,
         "mode": "CHAT",
+        "ui": {
+            "formRequested": False,
+        },
         "form": form,
         "chat": {"history": []},
         "retrieval": {

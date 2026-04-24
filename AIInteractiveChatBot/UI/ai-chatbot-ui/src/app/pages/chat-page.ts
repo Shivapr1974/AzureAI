@@ -184,7 +184,11 @@ export class ChatPageComponent implements OnInit {
   }
 
   showGuidedHelp(): boolean {
-    return this.state?.mode === 'GUIDED_FORM' || this.suggestedChips.length > 0;
+    return this.showFormWorkspace() && (this.state?.mode === 'GUIDED_FORM' || this.suggestedChips.length > 0);
+  }
+
+  showFormWorkspace(): boolean {
+    return !!this.state?.ui?.formRequested;
   }
 
   private currentGuidedFieldKey(): string | null {
