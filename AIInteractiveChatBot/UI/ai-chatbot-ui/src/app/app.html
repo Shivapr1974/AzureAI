@@ -12,10 +12,6 @@
       <a routerLink="/documents" routerLinkActive="active">Documents</a>
     </nav>
 
-    <button type="button" class="reset-button" (click)="startFresh()" [disabled]="resetting">
-      {{ resetting ? 'Resetting...' : 'Start New Session' }}
-    </button>
-
     <section class="status-card" *ngIf="state$ | async as state">
       <p class="card-label">Session</p>
       <p class="session-id">{{ state.sessionId }}</p>

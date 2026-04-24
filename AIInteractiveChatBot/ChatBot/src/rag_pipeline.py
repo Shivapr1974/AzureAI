@@ -156,6 +156,52 @@ def list_indexed_documents() -> list[dict]:
     return documents
 
 
+def delete_indexed_document(source: str) -> dict:
+    cleaned_source = source.strip()
+    if not cleaned_source:
+        return {"message": "Document source is required.", "deleted": 0, "source": source}
+
+    collection = get_collection()
+    if collection is None:
+        return {
+            "message": "Document deletion is unavailable because the Chroma collection is not initialized.",
+            "deleted": 0,
+            "source": cleaned_source,
+        }
+
+    try:
+        records = collection.get(where={"source": cleaned_source})
+    except Exception:
+        return {
+            "message": "Unable to look up the document for deletion.",
+            "deleted": 0,
+            "source": cleaned_source,
+        }
+
+    ids = records.get("ids", []) if records else []
+    if not ids:
+        return {
+            "message": f"No indexed document named {cleaned_source} was found.",
+            "deleted": 0,
+            "source": cleaned_source,
+        }
+
+    try:
+        collection.delete(ids=ids)
+    except Exception:
+        return {
+            "message": f"Unable to delete {cleaned_source} from ChromaDB.",
+            "deleted": 0,
+            "source": cleaned_source,
+        }
+
+    return {
+        "message": f"Removed {cleaned_source} from indexed documents.",
+        "deleted": len(ids),
+        "source": cleaned_source,
+    }
+
+
 def search_documents(query: str, top_k: int = 5) -> list[dict]:
     query = query.strip()
     if not query:
@@ -226,13 +272,48 @@ def grounded_answer(question: str, state: dict) -> tuple[str, list[dict]]:
     state["retrieval"]["context"] = contexts
     state["retrieval"]["documents"] = list_indexed_documents()
 
-    if not contexts:
-        return (
-            "I don’t have grounded document context for that yet. Upload documents on the Documents page or continue editing the BC form manually.",
-            contexts,
-        )
-
     client = get_openai_client()
+    if not contexts:
+        if client is None:
+            return (
+                "I could not find matching document context, but you can still keep chatting with me. "
+                "If you want grounded document answers, upload files on the Documents page.",
+                contexts,
+            )
+
+        form = state.get("form", {})
+        form_context = "\n".join(
+            f"- {field}: {value or 'Not provided'}"
+            for field, value in form.items()
+        )
+        fallback_prompt = f"""
+You are Cora, the FormIQ AI assistant.
+
+No relevant RAG context was found for this message.
+You should still answer helpfully and naturally.
+
+Rules:
+- If the user is making normal conversation, respond normally.
+- If the user is asking for help with the BC form, use the current form state.
+- If the user seems to want document-backed information, be honest that no supporting document context was found.
+- Keep the answer concise and easy to act on.
+
+Current BC Form State:
+{form_context}
+
+User Question:
+{question}
+""".strip()
+
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[{"role": "user", "content": fallback_prompt}],
+            temperature=0.4,
+            max_tokens=300,
+        )
+        answer = response.choices[0].message.content or ""
+        return answer.strip(), contexts
+
     if client is None:
         first = contexts[0]
         return (

@@ -10,7 +10,12 @@ from src.formiq_service import (
     handle_form_update,
     handle_submit,
 )
-from src.rag_pipeline import list_indexed_documents, save_uploaded_file, search_documents
+from src.rag_pipeline import (
+    delete_indexed_document,
+    list_indexed_documents,
+    save_uploaded_file,
+    search_documents,
+)
 from src.review_engine import run_review
 from src.state_store import get_public_state, session_store
 
@@ -42,6 +47,11 @@ class ReviewRequest(BaseModel):
 class SearchRequest(BaseModel):
     sessionId: str | None = None
     query: str
+
+
+class DeleteDocumentRequest(BaseModel):
+    sessionId: str | None = None
+    source: str
 
 
 app = FastAPI(title="FormIQ AI Backend")
@@ -135,6 +145,25 @@ async def documents(sessionId: str | None = None):
     documents = list_indexed_documents()
     state["retrieval"]["documents"] = documents
     return {
+        "sessionId": state["sessionId"],
+        "documents": documents,
+        "appState": get_public_state(state),
+    }
+
+
+@app.post("/documents/delete")
+async def delete_document(request: DeleteDocumentRequest):
+    state = session_store.get_or_create(request.sessionId)
+    result = delete_indexed_document(request.source)
+    documents = list_indexed_documents()
+    state["retrieval"]["documents"] = documents
+    state["retrieval"]["context"] = [
+        item for item in state["retrieval"]["context"]
+        if item.get("source") != request.source
+    ]
+
+    return {
+        **result,
         "sessionId": state["sessionId"],
         "documents": documents,
         "appState": get_public_state(state),

@@ -13,20 +13,9 @@
         {{ lastStatus }}
       </div>
 
-      <div class="chip-row" *ngIf="suggestedChips.length">
-        <button
-          *ngFor="let chip of suggestedChips"
-          type="button"
-          class="chip"
-          (click)="applyChip(chip)"
-        >
-          {{ chip.label }}
-        </button>
-      </div>
-
       <div class="chat-window">
         <div class="empty-state" *ngIf="!state.chat.history.length">
-          Ask a grounded question, edit the BC form, or click a suggested chip to get started.
+          Ask a grounded question, edit the BC form, or use the quick answers below the prompt to get started.
         </div>
 
         <article
@@ -38,6 +27,25 @@
           <p class="message-role">{{ item.role === 'user' ? 'You' : 'Cora' }}</p>
           <p class="message-text">{{ item.text }}</p>
         </article>
+
+        <section class="guided-help" *ngIf="showGuidedHelp()">
+          <div class="guided-copy">
+            <p class="guided-label">Current Form Field</p>
+            <strong>{{ currentGuidedFieldLabel() }}</strong>
+            <p>{{ currentGuidedFieldHint() }}</p>
+          </div>
+
+          <div class="chip-row chip-row-inline" *ngIf="suggestedChips.length">
+            <button
+              *ngFor="let chip of suggestedChips"
+              type="button"
+              class="chip"
+              (click)="applyChip(chip)"
+            >
+              {{ chip.label }}
+            </button>
+          </div>
+        </section>
       </div>
 
       <div class="composer">
@@ -106,6 +114,9 @@
           </button>
           <button type="button" (click)="submitForReview()" [disabled]="busy">
             Submit
+          </button>
+          <button type="button" class="ghost" (click)="startFresh()" [disabled]="resetting || busy">
+            {{ resetting ? 'Resetting...' : 'Start New Session' }}
           </button>
         </div>
       </section>

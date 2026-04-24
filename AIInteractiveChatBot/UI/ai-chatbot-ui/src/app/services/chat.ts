@@ -105,6 +105,15 @@ export interface DocumentsResponse {
   appState?: AppState;
 }
 
+export interface DeleteDocumentResponse {
+  message: string;
+  deleted: number;
+  source: string;
+  sessionId: string;
+  documents: DocumentRecord[];
+  appState?: AppState;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -194,6 +203,15 @@ export class ChatService {
     const params = this.sessionId ? new HttpParams().set('sessionId', this.sessionId) : undefined;
     return this.http
       .get<DocumentsResponse>(`${this.apiBase}/documents`, { params })
+      .pipe(tap((response) => this.updateClientState(response)));
+  }
+
+  deleteDocument(source: string): Observable<DeleteDocumentResponse> {
+    return this.http
+      .post<DeleteDocumentResponse>(`${this.apiBase}/documents/delete`, {
+        sessionId: this.sessionId,
+        source
+      })
       .pipe(tap((response) => this.updateClientState(response)));
   }
 

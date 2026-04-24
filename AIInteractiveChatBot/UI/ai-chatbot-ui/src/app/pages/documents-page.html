@@ -16,8 +16,18 @@
       <h2>Document Library</h2>
       <div class="doc-list" *ngIf="state.retrieval.documents.length; else noDocs">
         <article *ngFor="let doc of state.retrieval.documents" class="doc-item">
-          <strong>{{ doc.source }}</strong>
-          <span>{{ doc.chunkCount }} chunks</span>
+          <div class="doc-meta">
+            <strong>{{ doc.source }}</strong>
+            <span>{{ doc.chunkCount }} chunks</span>
+          </div>
+          <button
+            type="button"
+            class="delete-button"
+            (click)="removeDocument(doc.source)"
+            [disabled]="busy"
+          >
+            {{ deletingSource === doc.source ? 'Removing...' : 'Remove' }}
+          </button>
         </article>
       </div>
 
@@ -33,7 +43,17 @@
         <p class="eyebrow">Search</p>
         <h2>ChromaDB Lookup</h2>
       </div>
-      <button type="button" (click)="searchDocs()" [disabled]="busy">Search</button>
+      <div class="search-actions">
+        <button
+          type="button"
+          class="secondary-button"
+          (click)="clearSearch()"
+          [disabled]="!searchQuery && !searchResults.length"
+        >
+          Clear
+        </button>
+        <button type="button" (click)="searchDocs()" [disabled]="busy">Search</button>
+      </div>
     </div>
 
     <div class="search-row">

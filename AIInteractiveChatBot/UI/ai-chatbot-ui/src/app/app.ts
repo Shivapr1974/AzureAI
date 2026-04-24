@@ -19,7 +19,6 @@ import { ChatService } from './services/chat';
 })
 export class App implements OnInit {
   readonly state$;
-  resetting = false;
 
   constructor(private readonly chatService: ChatService) {
     this.state$ = this.chatService.state$;
@@ -27,21 +26,5 @@ export class App implements OnInit {
 
   ngOnInit(): void {
     this.chatService.loadState().subscribe();
-  }
-
-  startFresh(): void {
-    if (this.resetting) {
-      return;
-    }
-
-    this.resetting = true;
-    this.chatService.resetSession().subscribe({
-      next: () => {
-        this.resetting = false;
-      },
-      error: () => {
-        this.resetting = false;
-      }
-    });
   }
 }

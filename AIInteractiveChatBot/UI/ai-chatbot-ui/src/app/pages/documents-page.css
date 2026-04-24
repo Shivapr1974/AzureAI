@@ -61,6 +61,12 @@ h2 {
   display: flex;
   justify-content: space-between;
   gap: 1rem;
+  align-items: center;
+}
+
+.doc-meta {
+  display: grid;
+  gap: 0.2rem;
 }
 
 .search-head {
@@ -69,6 +75,11 @@ h2 {
   gap: 1rem;
   align-items: center;
   margin-bottom: 1rem;
+}
+
+.search-actions {
+  display: flex;
+  gap: 0.75rem;
 }
 
 .search-row input {
@@ -93,6 +104,17 @@ button {
 button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.secondary-button,
+.delete-button {
+  background: rgba(15, 27, 54, 0.08);
+  color: var(--navy-800);
+  border: 1px solid rgba(100, 116, 139, 0.18);
+}
+
+.delete-button {
+  white-space: nowrap;
 }
 
 @media (max-width: 1100px) {

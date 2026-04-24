@@ -48,21 +48,6 @@
   gap: 0.65rem;
 }
 
-.reset-button {
-  border: 1px solid rgba(191, 219, 254, 0.22);
-  border-radius: 1rem;
-  padding: 0.9rem 1rem;
-  background: rgba(219, 234, 254, 0.08);
-  color: #eff6ff;
-  font: inherit;
-  cursor: pointer;
-}
-
-.reset-button:disabled {
-  opacity: 0.65;
-  cursor: not-allowed;
-}
-
 .nav a {
   text-decoration: none;
   color: #dbeafe;

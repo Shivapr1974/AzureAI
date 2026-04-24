@@ -17,6 +17,7 @@ export class DocumentsPageComponent implements OnInit {
   searchQuery = '';
   searchResults: EvidenceItem[] = [];
   busy = false;
+  deletingSource = '';
 
   constructor(private readonly chatService: ChatService) {}
 
@@ -67,6 +68,35 @@ export class DocumentsPageComponent implements OnInit {
       error: () => {
         this.searchResults = [];
         this.busy = false;
+      }
+    });
+  }
+
+  clearSearch(): void {
+    this.searchQuery = '';
+    this.searchResults = [];
+  }
+
+  removeDocument(source: string): void {
+    if (!source || this.busy) {
+      return;
+    }
+
+    this.busy = true;
+    this.deletingSource = source;
+    this.uploadStatus = `Removing ${source}...`;
+
+    this.chatService.deleteDocument(source).subscribe({
+      next: (response) => {
+        this.uploadStatus = response.message;
+        this.searchResults = this.searchResults.filter((item) => item.source !== source);
+        this.busy = false;
+        this.deletingSource = '';
+      },
+      error: () => {
+        this.uploadStatus = `Unable to remove ${source}.`;
+        this.busy = false;
+        this.deletingSource = '';
       }
     });
   }

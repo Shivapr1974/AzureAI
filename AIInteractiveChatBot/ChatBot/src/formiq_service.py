@@ -24,6 +24,21 @@ GUIDED_FIELD_HINTS = {
 }
 
 GUIDED_CANCEL_TERMS = {"cancel", "stop", "exit", "never mind", "nevermind"}
+GENERAL_CHAT_MARKERS = (
+    "joke",
+    "funny",
+    "laugh",
+    "hello",
+    "hi",
+    "hey",
+    "how are you",
+    "who are you",
+    "what can you do",
+    "thank you",
+    "thanks",
+    "tell me",
+    "write me",
+)
 
 
 def infer_intent(message: str, chip: Any | None = None) -> str:
@@ -90,6 +105,26 @@ def is_help_question(message: str) -> bool:
         return True
 
     starters = ("what", "how", "why", "can", "should", "help", "example", "explain")
+    return lowered.startswith(starters)
+
+
+def looks_like_general_chat(message: str, current_field: str) -> bool:
+    lowered = message.lower().strip()
+
+    if any(marker in lowered for marker in GENERAL_CHAT_MARKERS):
+        if current_field == "intType" and lowered in {"it", "data", "it & data", "it and data"}:
+            return False
+        return True
+
+    starters = (
+        "tell me",
+        "write",
+        "make",
+        "say",
+        "chat",
+        "let's talk",
+        "lets talk",
+    )
     return lowered.startswith(starters)
 
 
@@ -161,6 +196,15 @@ def handle_guided_form_turn(state: dict, message: str) -> dict:
     if is_help_question(message):
         answer = f"{GUIDED_FIELD_HINTS[current_field]} {get_guided_prompt(current_field)}"
         return create_response_payload(state, answer=answer, intent="FORM_QUESTION")
+
+    if looks_like_general_chat(message, current_field):
+        answer, _contexts = grounded_answer(message, state)
+        reminder = f"When you're ready, {get_guided_prompt(current_field)}"
+        return create_response_payload(
+            state,
+            answer=f"{answer}\n\n{reminder}",
+            intent="GENERAL_CHAT",
+        )
 
     validation_error = save_guided_field_value(state, current_field, message)
     if validation_error:

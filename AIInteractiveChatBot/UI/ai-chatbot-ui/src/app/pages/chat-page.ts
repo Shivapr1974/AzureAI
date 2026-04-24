@@ -24,6 +24,7 @@ export class ChatPageComponent implements OnInit {
   message = '';
   lastStatus = 'Chat with Cora to start filling the form or upload docs first.';
   busy = false;
+  resetting = false;
 
   readonly state$;
   readonly chips$;
@@ -136,6 +137,72 @@ export class ChatPageComponent implements OnInit {
         this.busy = false;
       }
     });
+  }
+
+  startFresh(): void {
+    if (this.resetting || this.busy) {
+      return;
+    }
+
+    this.resetting = true;
+    this.chatService.resetSession().subscribe({
+      next: (response) => {
+        this.lastStatus = response.answer ?? 'Started a new session.';
+        this.resetting = false;
+      },
+      error: () => {
+        this.lastStatus = 'Unable to reset the session.';
+        this.resetting = false;
+      }
+    });
+  }
+
+  currentGuidedFieldLabel(): string {
+    const field = this.currentGuidedFieldKey();
+    const labels: Record<string, string> = {
+      intType: 'Integration Type',
+      reqType: 'Request Type',
+      intName: 'Integration Name',
+      inOverview: 'Integration Overview',
+      inHighlights: 'Integration Highlights'
+    };
+
+    return field ? labels[field] : 'BC Form';
+  }
+
+  currentGuidedFieldHint(): string {
+    const field = this.currentGuidedFieldKey();
+    const hints: Record<string, string> = {
+      intType: 'Choose the category first. Quick chips work well here.',
+      reqType: 'Use a simple description like new capability request, enhancement, or change.',
+      intName: 'Type the name in plain language. This can be a business or system-facing integration name.',
+      inOverview: 'Write a short summary of the business need, systems involved, and expected outcome.',
+      inHighlights: 'You can type free text or add multiple highlight chips one by one.'
+    };
+
+    return field ? hints[field] : 'You can type directly into chat or edit the form on the right at any time.';
+  }
+
+  showGuidedHelp(): boolean {
+    return this.state?.mode === 'GUIDED_FORM' || this.suggestedChips.length > 0;
+  }
+
+  private currentGuidedFieldKey(): string | null {
+    const form = this.state?.form;
+    if (!form) {
+      return null;
+    }
+
+    const orderedFields: Array<keyof FormState> = [
+      'intType',
+      'reqType',
+      'intName',
+      'inOverview',
+      'inHighlights'
+    ];
+
+    const next = orderedFields.find((field) => !(form[field] ?? '').trim());
+    return next ?? null;
   }
 
   agentEntries(): Array<[string, AgentReviewResult]> {
