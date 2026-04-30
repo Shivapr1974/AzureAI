@@ -28,10 +28,10 @@ describe('App', () => {
     expect(app).toBeTruthy();
   });
 
-  it('should render the FormIQ title', async () => {
+  it('should render the FAIRA title', async () => {
     const fixture = TestBed.createComponent(App);
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Cora');
+    expect(compiled.querySelector('h1')?.textContent).toContain('FAIRA');
   });
 });

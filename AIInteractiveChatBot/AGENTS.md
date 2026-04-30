@@ -3,7 +3,7 @@
 ## Application Overview
 
 Application Name: FormIQ AI  
-Chat Assistant: Cora
+Chat Assistant: FAIRA
 
 FormIQ AI is an enterprise application with:
 - Angular frontend
@@ -27,7 +27,7 @@ Home Page:
 
 Chat Page:
 - Left: navigation menu
-- Center: chat (Cora)
+- Center: chat (FAIRA)
 - Right:
   - Top: BC form
   - Bottom: agent review results and scores
@@ -391,7 +391,7 @@ These notes describe the current working behavior of the codebase so it can be r
 ### Chat Page Behavior
 
 - Left sidebar: navigation and session status
-- Center panel: Cora chat
+- Center panel: FAIRA chat
 - Right panel top: BC form
 - Right panel bottom: review results
 - `Start New Session` button is next to form actions, not in the left sidebar
@@ -416,7 +416,7 @@ These notes describe the current working behavior of the codebase so it can be r
   - `overview: ...`
 - Guided mode should not force all chat into form capture
 - Normal chat like `tell me a joke` should still work while guided mode is active
-- After a normal chat answer during guided mode, Cora should gently return to the current missing field
+- After a normal chat answer during guided mode, FAIRA should gently return to the current missing field
 - Typing any of these cancels guided mode while keeping existing form values:
   - `cancel`
   - `stop`
@@ -474,8 +474,8 @@ These notes describe the current working behavior of the codebase so it can be r
 
 - Document-backed questions should use retrieved ChromaDB context when available
 - If retrieved context exists, grounded prompting should be used
-- If no relevant RAG context exists, Cora should still be able to respond to normal chat and lightweight assistance requests
-- If the user is asking for document-backed facts and no retrieval context is found, Cora should say that no supporting document context was found
+- If no relevant RAG context exists, FAIRA should still be able to respond to normal chat and lightweight assistance requests
+- If the user is asking for document-backed facts and no retrieval context is found, FAIRA should say that no supporting document context was found
 - Frontend must not call OpenAI directly
 
 ### Backend State Shape

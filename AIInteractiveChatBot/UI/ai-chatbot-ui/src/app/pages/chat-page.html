@@ -4,7 +4,7 @@
       <header class="panel-header">
         <div>
           <p class="eyebrow">Chat Workspace</p>
-          <h2>Cora</h2>
+          <h2>FAIRA</h2>
         </div>
         <span class="state-pill">{{ state.mode }}</span>
       </header>
@@ -24,7 +24,7 @@
           [class.user]="item.role === 'user'"
           [class.assistant]="item.role === 'assistant'"
         >
-          <p class="message-role">{{ item.role === 'user' ? 'You' : 'Cora' }}</p>
+          <p class="message-role">{{ item.role === 'user' ? 'You' : 'FAIRA' }}</p>
           <p class="message-text">{{ item.text }}</p>
         </article>
 
@@ -127,9 +127,26 @@
             <p class="eyebrow">Agent Review</p>
             <h3>{{ state.review.status }}</h3>
           </div>
-          <button type="button" class="secondary" (click)="rerunReview()" [disabled]="busy">
-            Run Review
-          </button>
+          <div class="review-actions">
+            <button type="button" class="secondary" (click)="rerunReview()" [disabled]="busy">
+              Run Review
+            </button>
+            <button
+              *ngIf="showComparisonAction()"
+              type="button"
+              class="secondary"
+              (click)="comparison ? openComparisonModal() : generateMockComparison()"
+              [disabled]="busy || generatingComparison"
+            >
+              {{
+                generatingComparison
+                  ? 'Generating...'
+                  : comparison
+                    ? 'Open Compare'
+                    : 'Compare'
+              }}
+            </button>
+          </div>
         </div>
 
         <p class="mock-label" *ngIf="state.review.isMock">
@@ -163,4 +180,56 @@
       </section>
     </aside>
   </div>
+
+  <section class="comparison-modal" *ngIf="showComparisonModal && comparison">
+    <div class="comparison-backdrop" (click)="closeComparisonModal()"></div>
+    <div class="comparison-dialog card">
+      <div class="comparison-header">
+        <div>
+          <p class="eyebrow">Mock Project Comparison</p>
+          <h3>Entered Form vs Generated Mock Project</h3>
+        </div>
+        <button type="button" class="ghost" (click)="closeComparisonModal()">Close</button>
+      </div>
+
+      <p class="comparison-summary">{{ comparison.comparisonSummary }}</p>
+
+      <div class="comparison-grid">
+        <article class="comparison-column">
+          <h4>Your Form</h4>
+          <div class="comparison-entry" *ngFor="let item of comparison.fieldComparisons">
+            <span>{{ item.label }}</span>
+            <strong>{{ item.enteredValue }}</strong>
+          </div>
+        </article>
+
+        <article class="comparison-column">
+          <h4>Mock Project</h4>
+          <div class="comparison-entry" *ngFor="let item of comparison.fieldComparisons">
+            <span>{{ item.label }}</span>
+            <strong>{{ item.mockValue }}</strong>
+          </div>
+        </article>
+      </div>
+
+      <div class="comparison-details">
+        <article class="comparison-detail-card" *ngFor="let item of comparison.fieldComparisons">
+          <div class="comparison-detail-head">
+            <strong>{{ item.label }}</strong>
+            <span class="assessment-pill" [ngClass]="assessmentClass(item.assessment)">
+              {{ item.assessment }}
+            </span>
+          </div>
+          <p>{{ item.notes }}</p>
+        </article>
+      </div>
+
+      <div class="comparison-next-steps" *ngIf="comparison.recommendedNextSteps.length">
+        <p class="eyebrow">Suggested Next Steps</p>
+        <ul>
+          <li *ngFor="let step of comparison.recommendedNextSteps">{{ step }}</li>
+        </ul>
+      </div>
+    </div>
+  </section>
 </section>

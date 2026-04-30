@@ -67,6 +67,7 @@ def run_review(state: dict) -> None:
     total_score = 0
 
     state["review"]["status"] = "RUNNING"
+    state["review"]["mockProjectComparison"] = None
 
     for agent in rules_index.get("agents", []):
         config = load_agent_config(agent["file"])

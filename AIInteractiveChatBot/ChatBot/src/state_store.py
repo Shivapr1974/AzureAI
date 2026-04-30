@@ -41,6 +41,7 @@ def build_initial_state(session_id: str | None = None) -> dict:
             "scores": {},
             "summary": "",
             "isMock": True,
+            "mockProjectComparison": None,
         },
         "_meta": {
             "formSources": {field: "" for field in BC_FORM_FIELDS},

@@ -15,7 +15,7 @@ This file complements `AGENTS.md` and captures concrete current behavior that sh
 
 ## Chat Behavior
 
-- Cora is both:
+- FAIRA is both:
   - a normal conversational assistant
   - a BC form assistant
 - Chat should not feel locked into BC form mode

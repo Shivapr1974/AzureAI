@@ -303,6 +303,7 @@ def handle_form_update(state: dict, form: dict[str, Any]) -> str:
     if not changed_fields:
         return "No BC form changes were applied."
 
+    state["review"]["mockProjectComparison"] = None
     readable = ", ".join(changed_fields)
     return f"Saved manual BC form updates for: {readable}."
 

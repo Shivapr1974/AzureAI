@@ -248,7 +248,7 @@ def build_grounded_prompt(question: str, state: dict, contexts: list[dict]) -> s
     ) or "No retrieved document context available."
 
     return f"""
-You are Cora, the FormIQ AI assistant.
+You are FAIRA, the Form AI & Request Assistant for FormIQ AI.
 
 Use the retrieved document context when helpful.
 Use the BC form state when it helps answer the question.
@@ -275,7 +275,7 @@ def build_fallback_prompt(question: str, state: dict) -> str:
     )
 
     return f"""
-You are Cora, the FormIQ AI assistant.
+You are FAIRA, the Form AI & Request Assistant for FormIQ AI.
 
 No useful retrieved document context was found for this message.
 You should still answer helpfully and naturally.

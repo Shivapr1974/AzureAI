@@ -10,6 +10,7 @@ from src.formiq_service import (
     handle_form_update,
     handle_submit,
 )
+from src.mock_project_service import generate_mock_project_comparison
 from src.rag_pipeline import (
     delete_indexed_document,
     list_indexed_documents,
@@ -52,6 +53,11 @@ class SearchRequest(BaseModel):
 class DeleteDocumentRequest(BaseModel):
     sessionId: str | None = None
     source: str
+
+
+class MockProjectRequest(BaseModel):
+    sessionId: str | None = None
+    form: dict[str, Any] = Field(default_factory=dict)
 
 
 app = FastAPI(title="FormIQ AI Backend")
@@ -122,6 +128,20 @@ async def review(request: ReviewRequest):
         answer="Review completed. Scores are labeled as demo/mock until the production scoring model is finalized.",
         intent="SUBMIT_ACTION",
     )
+
+
+@app.post("/review/mock-project")
+async def review_mock_project(request: MockProjectRequest):
+    state = session_store.get_or_create(request.sessionId)
+    if request.form:
+        handle_form_update(state, request.form)
+
+    comparison = generate_mock_project_comparison(state)
+    return {
+        "sessionId": state["sessionId"],
+        "comparison": comparison,
+        "appState": get_public_state(state),
+    }
 
 
 @app.post("/upload")

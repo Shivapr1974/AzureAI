@@ -7,6 +7,7 @@ import {
   AppState,
   ChatService,
   FormState,
+  MockProjectComparison,
   SuggestedChip
 } from '../services/chat';
 
@@ -22,9 +23,12 @@ export class ChatPageComponent implements OnInit {
   draftForm: FormState = this.emptyForm();
   suggestedChips: SuggestedChip[] = [];
   message = '';
-  lastStatus = 'Chat with Cora to start filling the form or upload docs first.';
+  lastStatus = 'Chat with FAIRA to start filling the form or upload docs first.';
   busy = false;
   resetting = false;
+  generatingComparison = false;
+  showComparisonModal = false;
+  comparison: MockProjectComparison | null = null;
 
   readonly state$;
   readonly chips$;
@@ -39,6 +43,7 @@ export class ChatPageComponent implements OnInit {
       this.state = state;
       if (state) {
         this.draftForm = { ...state.form };
+        this.comparison = state.review.mockProjectComparison ?? null;
       }
     });
 
@@ -137,6 +142,46 @@ export class ChatPageComponent implements OnInit {
         this.busy = false;
       }
     });
+  }
+
+  generateMockComparison(): void {
+    if (this.busy || this.generatingComparison) {
+      return;
+    }
+
+    this.generatingComparison = true;
+    this.chatService.generateMockProjectComparison(this.draftForm).subscribe({
+      next: (response) => {
+        this.comparison = response.comparison;
+        this.showComparisonModal = true;
+        this.lastStatus = 'Mock project comparison generated.';
+        this.generatingComparison = false;
+      },
+      error: () => {
+        this.lastStatus = 'Unable to generate the mock project comparison.';
+        this.generatingComparison = false;
+      }
+    });
+  }
+
+  openComparisonModal(): void {
+    if (!this.comparison) {
+      return;
+    }
+    this.showComparisonModal = true;
+  }
+
+  closeComparisonModal(): void {
+    this.showComparisonModal = false;
+  }
+
+  showComparisonAction(): boolean {
+    const status = this.state?.review.status;
+    return status === 'COMPLETED' || status === 'NEEDS_REVIEW';
+  }
+
+  assessmentClass(assessment: string): string {
+    return assessment.toLowerCase().replace(/\s+/g, '-');
   }
 
   startFresh(): void {

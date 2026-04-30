@@ -38,6 +38,7 @@ export interface ReviewState {
   scores: Record<string, number | string>;
   summary: string;
   isMock: boolean;
+  mockProjectComparison?: MockProjectComparison | null;
 }
 
 export interface FormState {
@@ -71,6 +72,23 @@ export interface AppState {
   };
   retrieval: RetrievalState;
   review: ReviewState;
+}
+
+export interface MockProjectFieldComparison {
+  field: string;
+  label: string;
+  enteredValue: string;
+  mockValue: string;
+  assessment: string;
+  notes: string;
+}
+
+export interface MockProjectComparison {
+  mockProject: FormState;
+  comparisonSummary: string;
+  fieldComparisons: MockProjectFieldComparison[];
+  recommendedNextSteps: string[];
+  isMock: boolean;
 }
 
 export interface SuggestedChip {
@@ -114,6 +132,12 @@ export interface DeleteDocumentResponse {
   source: string;
   sessionId: string;
   documents: DocumentRecord[];
+  appState?: AppState;
+}
+
+export interface MockProjectComparisonResponse {
+  sessionId: string;
+  comparison: MockProjectComparison;
   appState?: AppState;
 }
 
@@ -184,6 +208,15 @@ export class ChatService {
   review(form: FormState): Observable<ApiResponse> {
     return this.http
       .post<ApiResponse>(`${this.apiBase}/review`, {
+        sessionId: this.sessionId,
+        form
+      })
+      .pipe(tap((response) => this.updateClientState(response)));
+  }
+
+  generateMockProjectComparison(form: FormState): Observable<MockProjectComparisonResponse> {
+    return this.http
+      .post<MockProjectComparisonResponse>(`${this.apiBase}/review/mock-project`, {
         sessionId: this.sessionId,
         form
       })
